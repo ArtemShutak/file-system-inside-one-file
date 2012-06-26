@@ -54,8 +54,8 @@ public final class FileImpl implements IFile{
 	}
 
 	@Override
-	public boolean canWrite() {
-		return fs.canWriteTo(this);
+	public boolean isWritable() {
+		return fs.isWritable(this);
 	}
 
 	@Override
@@ -80,12 +80,12 @@ public final class FileImpl implements IFile{
 
 	@Override
 	public boolean setReadOnly() {
-		return setReadOnly(true);
+		return setWritable(false);
 	}
 
 	@Override
-	public boolean setReadOnly(boolean isReadOnly) {
-		return fs.setReadOnly(this, isReadOnly);
+	public boolean setWritable(boolean isWritable) {
+		return fs.setWritable(this, isWritable);
 	}
 
 	@Override

@@ -22,16 +22,16 @@ public interface IFileSystem {
 
 	long length(IFile file);
 
-	boolean canWriteTo(IFile file);
-	boolean setReadOnly(IFile file, boolean isReadOnly);
+	boolean isWritable(IFile file);
+	boolean setWritable(IFile file, boolean isWritable);
 
 	long lastModified(IFile file);
+	boolean setLastModified(IFile file, long time);
 
 	OutputStream getNewOutputStream(IFile file, boolean append) throws FileNotFoundException;
 
 	InputStream getNewInputStream(IFile file, long startByteIndex) throws FileNotFoundException ;
 
-	boolean setLastModified(IFile file, long time);
 
 	boolean exists(IFile file);
 

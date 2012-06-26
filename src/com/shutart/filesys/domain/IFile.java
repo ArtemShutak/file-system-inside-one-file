@@ -34,7 +34,7 @@ public interface IFile {
 	InputStream getNewInputStream(long startByteIndex) throws FileNotFoundException;
 	
 //	boolean canRead(); 
-	boolean canWrite();
+	boolean isWritable();
 
 	boolean delete();
 
@@ -44,7 +44,7 @@ public interface IFile {
 	boolean setLastModified(long time);
 
 	boolean setReadOnly();
-	boolean setReadOnly(boolean isReadOnly);
+	boolean setWritable(boolean isWritable);
 
 //	int compareTo(Object o);
 //	boolean	equals(Object obj); 

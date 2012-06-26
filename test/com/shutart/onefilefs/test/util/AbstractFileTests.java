@@ -26,7 +26,7 @@ public abstract class AbstractFileTests {
 	private IFile file;
 	private OutputStream out;
 	private InputStream in;
-
+	
 	@Before
 	public void setUp() throws Exception {
 		file = newFile(FILE_NAME);
@@ -55,7 +55,7 @@ public abstract class AbstractFileTests {
 	@Test
 	public void fileNotExistTest() {
 		assertFalse(file.exists());
-		assertFalse(file.canWrite());
+		assertFalse(file.isWritable());
 		assertTrue(file.length()==0);
 		assertTrue(file.lastModified() == FSConstans.START_LAST_MODIF_VAL);
 	}
@@ -67,7 +67,7 @@ public abstract class AbstractFileTests {
 		assertTrue(file.createNewFile());
 		assertTrue(startTime <= file.lastModified());
 		assertTrue(file.exists());
-		assertTrue(file.canWrite());
+		assertTrue(file.isWritable());
 		assertTrue(file.length()==0);
 	}
 
@@ -97,7 +97,7 @@ public abstract class AbstractFileTests {
 		assertTrue(file.delete());
 		
 		assertFalse(file.exists());
-		assertFalse(file.canWrite());
+		assertFalse(file.isWritable());
 		assertTrue(file.length()==0);
 		assertTrue(file.lastModified() == FSConstans.START_LAST_MODIF_VAL);
 	}
@@ -111,26 +111,26 @@ public abstract class AbstractFileTests {
 	public void setReadOnlyFileTest2() {
 		assertTrue(file.createNewFile());
 		assertTrue(file.setReadOnly());
-		assertFalse(file.canWrite());
+		assertFalse(file.isWritable());
 	}
 	
 	
 	@Test
 	public void doubleReadOnlyFileTest() {
 		assertTrue(file.createNewFile());
-		assertTrue(file.setReadOnly(true));
-		assertFalse(file.canWrite());
-		assertTrue(file.setReadOnly(false));
-		assertTrue(file.canWrite());
+		assertTrue(file.setWritable(false));
+		assertFalse(file.isWritable());
+		assertTrue(file.setWritable(true));
+		assertTrue(file.isWritable());
 	}
 	
 	@Test
 	public void doubleReadOnlyFileTest2() {
 		assertTrue(file.createNewFile());
-		assertTrue(file.setReadOnly(true));
-		assertFalse(file.canWrite());
-		assertTrue(file.setReadOnly(true));
-		assertFalse(file.canWrite());
+		assertTrue(file.setWritable(false));
+		assertFalse(file.isWritable());
+		assertTrue(file.setWritable(false));
+		assertFalse(file.isWritable());
 	}
 
 	
@@ -161,7 +161,7 @@ public abstract class AbstractFileTests {
 	public void noChangeLastModifTimeFileTest2() {
 		assertTrue(file.createNewFile());
 		long beforTime = file.lastModified();
-		file.setReadOnly(true);
+		file.setWritable(true);
 		assertEquals(file.lastModified(), beforTime);
 	}
 	
@@ -169,7 +169,7 @@ public abstract class AbstractFileTests {
 	public void noChangeLastModifTimeFileTest3() {
 		assertTrue(file.createNewFile());
 		long beforTime = file.lastModified();
-		file.setReadOnly(false);
+		file.setWritable(false);
 		assertEquals(file.lastModified(), beforTime);
 	}
 

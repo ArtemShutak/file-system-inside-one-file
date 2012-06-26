@@ -109,7 +109,7 @@ public final class MemoryFileSystem implements IFileSystem {
 	}
 
 	@Override
-	public boolean canWriteTo(IFile file) {
+	public boolean isWritable(IFile file) {
 		if (!exists(file))
 			return false;
 		return !attrsOf(file).isReadOnly();
@@ -117,10 +117,10 @@ public final class MemoryFileSystem implements IFileSystem {
 
 
 	@Override
-	public boolean setReadOnly(IFile file, boolean isReadOnly) {
+	public boolean setWritable(IFile file, boolean isWritable) {
 		if (!exists(file))
 			return false;
-		attrsOf(file).setReadOnly(isReadOnly);
+		attrsOf(file).setReadOnly(!isWritable);
 		attrsOf(file).setLastModified(System.currentTimeMillis());
 		return true;
 	}
@@ -144,7 +144,7 @@ public final class MemoryFileSystem implements IFileSystem {
 	public OutputStream getNewOutputStream(final IFile file, boolean append) throws FileNotFoundException {
 		if (!exists(file))
 			initFile(file);
-		if (!canWriteTo(file))
+		if (!isWritable(file))
 			throw new FileNotFoundException();
 		if (append) {
 			return new OutputStream() {

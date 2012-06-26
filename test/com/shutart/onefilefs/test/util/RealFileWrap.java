@@ -60,7 +60,7 @@ public final class RealFileWrap implements IFile{
 	}
 
 	@Override
-	public boolean canWrite() {
+	public boolean isWritable() {
 		return file.canWrite();
 	}
 
@@ -90,8 +90,8 @@ public final class RealFileWrap implements IFile{
 	}
 
 	@Override
-	public boolean setReadOnly(boolean isReadOnly) {
-		return file.setWritable(!isReadOnly);
+	public boolean setWritable(boolean isWritable) {
+		return file.setWritable(isWritable);
 	}
 
 	@Override
