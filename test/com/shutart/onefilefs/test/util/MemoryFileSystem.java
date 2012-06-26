@@ -16,7 +16,6 @@ import com.shutart.filesys.domain.IFileSystem;
 
 public final class MemoryFileSystem implements IFileSystem {
 	
-	public static final char SEPARATOR = '/';
 	private final FileAttrs getDefaultAttrs(){return new FileAttrs(false, FSConstans.START_LAST_MODIF_VAL);}
 	
 	private final Map<String, IFile> fFiles = new HashMap<String, IFile>();
@@ -98,7 +97,7 @@ public final class MemoryFileSystem implements IFileSystem {
 
 	@Override
 	public char getSeparator() {
-		return SEPARATOR;
+		return FSConstans.SEPARATOR;
 	}
 
 	@Override
