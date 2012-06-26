@@ -1,4 +1,4 @@
-package com.shutart.onefilefs.test.util.complete;
+package com.shutart.onefilefs.test.completed;
 
 import com.shutart.filesys.domain.FileImpl;
 import com.shutart.filesys.domain.IFile;
