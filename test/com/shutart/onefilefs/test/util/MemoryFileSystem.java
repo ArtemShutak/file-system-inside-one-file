@@ -1,4 +1,4 @@
-package com.shutart.onefilefs.test;
+package com.shutart.onefilefs.test.util;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import com.shutart.filesys.domain.FileImpl;
 import com.shutart.filesys.domain.IFile;
 import com.shutart.filesys.domain.IFileSystem;
 
-public class MemoryFileSystem implements IFileSystem {
+public final class MemoryFileSystem implements IFileSystem {
 	
 	public static final char SEPARATOR = '/';
 	private final FileAttrs getDefaultAttrs(){return new FileAttrs(false, FSConstans.START_LAST_MODIF_VAL);}

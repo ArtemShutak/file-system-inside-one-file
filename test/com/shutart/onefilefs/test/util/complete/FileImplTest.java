@@ -1,10 +1,12 @@
-package com.shutart.onefilefs.test;
+package com.shutart.onefilefs.test.util.complete;
 
 import com.shutart.filesys.domain.FileImpl;
 import com.shutart.filesys.domain.IFile;
 import com.shutart.filesys.domain.IFileSystem;
+import com.shutart.onefilefs.test.util.AbstractFileTests;
+import com.shutart.onefilefs.test.util.MemoryFileSystem;
 
-public final class FileImplTest extends AbstractFileTests {
+final class FileImplTest extends AbstractFileTests {
 
 	@Override
 	protected IFile newFile(String name) {

@@ -1,4 +1,4 @@
-package com.shutart.onefilefs.test;
+package com.shutart.onefilefs.test.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import com.shutart.filesys.domain.FileNameUtil;
 import com.shutart.filesys.domain.IFile;
 
-public class RealFileWrap implements IFile{
+public final class RealFileWrap implements IFile{
 	
 	private final File file;
 	private final String fileName;
