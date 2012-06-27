@@ -2,6 +2,8 @@ package com.shutart.onefilefs.test.util;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -154,6 +156,57 @@ public abstract class AbstractDiskTest {
 	public void throwException4SimpleSetTest8() {
 		byte[] bytes = {1,2,3};//error length
 		disk.setPagesContent(0, 1, bytes);
+	}
+	
+	public void setMethodShouldCopyBytesOnDisk_1() {
+		byte[] bytes = {1,2};
+		byte[] bytesCopy = Arrays.copyOf(bytes, bytes.length);
+		int pageNum = 1;
+		disk.setPageContent(pageNum , bytes);
+		
+		bytes[0] = 13;
+		
+		assertArrayEquals(disk.getPageContent(pageNum), bytesCopy);
+	}
+	
+	public void setMethodShouldCopyBytesOnDisk_2() {
+		byte[] bytes = {1,2,3,4};
+		byte[] bytesCopy = Arrays.copyOf(bytes, bytes.length);
+		int startPageNum = 1;
+		int endPageNum = 2;
+		disk.setPagesContent(startPageNum, endPageNum, bytes);
+		
+		bytes[0] = 13;
+		bytes[3] = 73;
+		
+		assertArrayEquals(disk.getPagesContent(startPageNum, endPageNum), bytesCopy);
+	}
+	
+	public void getMethodShouldCopyBytesFromDisk_1() {
+		byte[] bytes = {1,2};
+		int pageNum = 1;
+		disk.setPageContent(pageNum , bytes);
+		
+		bytes = disk.getPageContent(pageNum);
+		byte[] bytesCopy = Arrays.copyOf(bytes, bytes.length);
+		
+		bytes[1] = 7;
+		
+		assertArrayEquals(disk.getPageContent(pageNum), bytesCopy);
+	}
+	
+	public void getMethodShouldCopyBytesFromDisk_2() {
+		byte[] bytes = {1,2, 7,8};
+		int startPageNum = 2;
+		int endPageNum = 3;
+		disk.setPagesContent(startPageNum, endPageNum, bytes);
+		
+		bytes = disk.getPagesContent(startPageNum, endPageNum);
+		byte[] bytesCopy = Arrays.copyOf(bytes, bytes.length);
+		
+		bytes[2] = 36;
+		
+		assertArrayEquals(disk.getPagesContent(startPageNum, endPageNum), bytesCopy);
 	}
 
 }
