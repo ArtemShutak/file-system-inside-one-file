@@ -36,4 +36,6 @@ public interface IDisk {
 	 */
 	void setPagesContent(int startPageNumber, int endPageNumber, byte[] pageContent);
 
+	void delete();
+
 }
