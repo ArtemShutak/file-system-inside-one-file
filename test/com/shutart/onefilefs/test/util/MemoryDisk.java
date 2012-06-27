@@ -61,7 +61,11 @@ public final class MemoryDisk implements IDisk {
 	@Override
 	public void setPagesContent(int startPageNumber, int endPageNumber,
 			byte[] pageContent) {
+		if (pageContent == null)
+			throw new NullPointerException();
 		validatePageNumbers(startPageNumber, endPageNumber);
+		if (pageContent.length != (endPageNumber-startPageNumber+1)*getPageSize())
+			throw new IllegalArgumentException();
 		for (int i = getFirstIndexOfByteOfPage(startPageNumber), j = 0; j < pageContent.length; i++, j++) {
 			bytes[i] = pageContent[j];
 		}
