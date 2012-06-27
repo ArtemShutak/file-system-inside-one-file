@@ -120,7 +120,7 @@ public final class MemoryFileSystem implements IFileSystem {
 		if (!exists(file))
 			return false;
 		attrsOf(file).setReadOnly(!isWritable);
-		attrsOf(file).setLastModified(System.currentTimeMillis());
+//		attrsOf(file).setLastModified(System.currentTimeMillis());
 		return true;
 	}
 
