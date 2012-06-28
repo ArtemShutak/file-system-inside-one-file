@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.shutart.filesys.domain.FSConstans;
-import com.shutart.filesys.domain.FileImpl;
 import com.shutart.filesys.domain.IFile;
 import com.shutart.filesys.domain.IFileSystem;
 
@@ -61,21 +60,6 @@ public final class MemoryFileSystem implements IFileSystem {
 	}
 
 	@Override
-	public IFile getFileByName(String fileName) {
-		IFile file = fFiles.get(fileName);
-		if (file == null){
-			file = new FileImpl(fileName, this);
-//			fFiles.put(fileName, file);
-		}
-		return file;
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return fFiles.isEmpty();
-	}
-
-	@Override
 	public void deleteFile(String fileName) {
 		deleteFile(fFiles.get(fileName));
 	}
@@ -88,11 +72,6 @@ public final class MemoryFileSystem implements IFileSystem {
 		fBytesOfFiles.remove(file);
 		fAttrsOfFiles.remove(file);
 		return true;
-	}
-
-	@Override
-	public boolean containsFile(String fileName) {
-		return fFiles.containsKey(fileName);
 	}
 
 	@Override

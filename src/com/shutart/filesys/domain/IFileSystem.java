@@ -8,16 +8,10 @@ public interface IFileSystem {
 
 	void clear();
 
-	IFile getFileByName(String fileName);
-
-	boolean isEmpty();
-
 	void deleteFile(String fileName);
 
 	boolean deleteFile(IFile file);
 
-	boolean containsFile(String fileName);
-	
 	char getSeparator();
 
 	long length(IFile file);
