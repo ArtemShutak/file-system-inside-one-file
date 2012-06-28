@@ -60,8 +60,8 @@ public final class MemoryFileSystem implements IFileSystem {
 	}
 
 	@Override
-	public void deleteFile(String fileName) {
-		deleteFile(fFiles.get(fileName));
+	public boolean deleteFile(String fileName) {
+		return deleteFile(fFiles.get(fileName));
 	}
 
 	@Override
@@ -193,6 +193,10 @@ public final class MemoryFileSystem implements IFileSystem {
 		return true;
 	}
 
+	@Override
+	public boolean initFile(String fileName) {
+		throw new UnsupportedOperationException();
+	}
 	private static final class MyInputStream extends InputStream{
 		
 		private int index;
@@ -218,6 +222,7 @@ public final class MemoryFileSystem implements IFileSystem {
 //		return fBytesOfFiles.get(file)!=null;
 		return fFiles.values().contains(file);
 	}
+
 
 
 }

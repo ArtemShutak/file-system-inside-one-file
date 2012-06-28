@@ -8,7 +8,7 @@ public interface IFileSystem {
 
 	void clear();
 
-	void deleteFile(String fileName);
+	boolean deleteFile(String fileName);
 
 	boolean deleteFile(IFile file);
 
@@ -30,6 +30,8 @@ public interface IFileSystem {
 	boolean exists(IFile file);
 
 	boolean initFile(IFile file);
+
+	boolean initFile(String fileName);
 
 	
 }
