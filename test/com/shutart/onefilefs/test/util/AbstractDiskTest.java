@@ -16,23 +16,17 @@ public abstract class AbstractDiskTest {
 	private static final int PAGE_SIZE = 2;
 	private IDisk disk;
 	
-	private static int ind = 1;
-	
 	public abstract IDisk getNewDisk(int numberOfPages, int pageSize);
 
 	@Before
 	public void setUp() throws Exception {
-		System.out.println(ind++ + "). SetUp");
 		disk = getNewDisk(NUMBER_OF_PAGES, PAGE_SIZE);
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		System.out.println("tearDown1");
 		disk.clear();
-		System.out.println("tearDown2");
 		disk.delete();
-		System.out.println("tearDown3");
 	}
 
 	@Test
