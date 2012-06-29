@@ -12,6 +12,7 @@ public class AllTestsInOne{
      suite.addTest(new JUnit4TestAdapter(RealFileTest.class));
      suite.addTest(new JUnit4TestAdapter(FileImplTest.class));
      suite.addTest(new JUnit4TestAdapter(MemoryDiskTest.class));
+     suite.addTest(new JUnit4TestAdapter(OneFileDiskTest.class));
 
      return suite; 
    }
