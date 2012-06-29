@@ -10,32 +10,38 @@ public interface IDisk {
 	int getPageSize();
 	
 	/**
-	 * @param pageNumber - number of page (from 0 to {@link #getNumberOfPages()}-1)
-	 * @return the bytes of page by number (as {@link #getPagesContent(pageNumber, pageNumber)})
+	 * @return the bytes of page by number (as {@link #getPagesContent(pageNumber, 0, pageSize)})
 	 */
 	byte[] getPageContent(int pageNumber);
 	
 	/**
-	 * @param startPageNumber - start number of page 
+	 * 
+	 * @param pageNumber - number of page 
 	 * 	(from 0 to {@link #getNumberOfPages()}-1)
-	 * @param endPageNumber- end number of page 
-	 * 	(from 0 to {@link #getNumberOfPages()}-1)
+	 * @param from - values: 0 - ({@link #getPageSize()}-1)
+	 * @param to - values: 1 - {@link #getPageSize()}
 	 * @return
 	 */
-	byte[] getPagesContent(int startPageNumber, int endPageNumber);
-	
+	byte[] getPageContent(int pageNumber, int from, int to);
 	/**
-	 * Equivalent to the {@link #setPagesContent(pageNumber, pageNumber, pageContent)}
+	 * Equivalent to the {@link #setPageContent(pageNumber, 0, pageSize, pageContent)
 	 */
 	void setPageContent(int pageNumber, byte[] pageContent);
+	
 	/**
 	 * 
 	 * @param pageNumber
-	 * @param pageContent - the bytes for writing on disk
-	 * @throws IllegalArgumentException if pageContent.length() != {@link #getPageSize()} * (endPageNumber-startPageNumber + 1)
+	 * @param from - values: 0 - ({@link #getPageSize()}-1)
+	 * @param pageContent
 	 */
-	void setPagesContent(int startPageNumber, int endPageNumber, byte[] pageContent);
+	void setPageContent(int pageNumber, int from, byte[] pageContent);
 
-	void delete();
+	boolean delete();
+
+	int getSizeInBytes();
+
+	void clear();
+
+
 
 }
