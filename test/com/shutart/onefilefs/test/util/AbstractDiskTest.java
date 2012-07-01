@@ -60,6 +60,15 @@ public abstract class AbstractDiskTest {
 		assertArrayEquals(pageContent, disk.getPageContent(pageNum, 1, 2));
 	}
 	
+	@Test
+	public void simpleSetAndGetTest3() {
+		int pageNumber = 9;
+		int innerIndex = 1;
+		byte b = 123;
+		disk.setByte(pageNumber, innerIndex, b);
+		assertEquals(disk.getByte(pageNumber, innerIndex), b);
+	}
+	
 	//get exceptions
 	
 	@Test(expected = IndexOutOfBoundsException.class)

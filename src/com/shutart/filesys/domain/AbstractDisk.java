@@ -21,6 +21,12 @@ public abstract class AbstractDisk implements IDisk {
 	public final int getPageSize() {
 		return pageSize;
 	}
+	
+	@Override
+	public byte getByte(int pageNumber, int innerIndex) {
+		return getPageContent(pageNumber, innerIndex, innerIndex + 1)[0];
+	}
+
 
 	@Override
 	public final byte[] getPageContent(int pageNumber) {
@@ -46,6 +52,11 @@ public abstract class AbstractDisk implements IDisk {
 	}
 
 	protected abstract byte[] getPageContentBody(int pageNumber, int from, int to) ;
+
+	@Override
+	public void setByte(int pageNumber, int innerIndex, byte b) {
+		setPageContent(pageNumber, innerIndex, new byte[]{b});
+	}
 
 	@Override
 	public final void setPageContent(int pageNumber, byte[] pageContent) {

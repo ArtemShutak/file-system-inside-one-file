@@ -42,6 +42,22 @@ public interface IDisk {
 
 	void clear();
 
+	/**
+	 * 
+	 * @param pageNumber
+	 * @param innerIndex - from 0 to pageSize-1
+	 * @return
+	 */
+	byte getByte(int pageNumber, int innerIndex);
+
+	/**
+	 * 
+	 * @param pageNumber
+	 * @param innerIndex - from 0 to pageSize-1
+	 * @param b 
+	 */
+	void setByte(int pageNumber, int innerIndex, byte b);
+
 
 
 }
