@@ -12,10 +12,8 @@ final class DiskIndex {
 	private static final int FREE_FILE_ID = -1;
 	
 	private final IDisk disk;
-	//TODO
-	private int lastTakenFileId;
-	//TODO
-	private int lastTakenPageNum;
+	private int firstCandidateToBeFreeFileId;
+	private int firstCandidateToBeNumberOfFreePage;
 
 	DiskIndex(IDisk disk) {
 		this.disk = disk;
@@ -58,11 +56,11 @@ final class DiskIndex {
 	 * @return free file id (from 0 to {@link IDisk#getNumberOfPages()}-1 )
 	 */
 	int getFreeFileIdAndTake() {
-		for (int fileId = lastTakenFileId; fileId < disk.getNumberOfPages(); fileId++) {
+		for (int fileId = firstCandidateToBeFreeFileId; fileId < disk.getNumberOfPages(); fileId++) {
 			if (getPageNumBy(fileId)==FREE_FILE_ID)
 				return takeThisFileIdAndGetIndex(fileId);
 		}
-		for (int fileId = 0; fileId < lastTakenFileId; fileId++) {
+		for (int fileId = 0; fileId < firstCandidateToBeFreeFileId; fileId++) {
 			if (getPageNumBy(fileId) == FREE_FILE_ID)
 				return takeThisFileIdAndGetIndex(fileId);
 		}
@@ -72,9 +70,9 @@ final class DiskIndex {
 	private int takeThisFileIdAndGetIndex(int fileId) {
 		int pageNum = getFreePageNumAndTake();
 		setPageNum4FileId(fileId, pageNum);
-		lastTakenFileId = fileId + 1;
-		if (lastTakenFileId == disk.getNumberOfPages())
-			lastTakenFileId = 0;
+		firstCandidateToBeFreeFileId = fileId + 1;
+		if (firstCandidateToBeFreeFileId == disk.getNumberOfPages())
+			firstCandidateToBeFreeFileId = 0;
 		return fileId;
 	}
 
@@ -83,11 +81,11 @@ final class DiskIndex {
 	}
 
 	int getFreePageNumAndTake(){
-		for (int pageNum = lastTakenPageNum; pageNum < disk.getNumberOfPages(); pageNum++) {
+		for (int pageNum = firstCandidateToBeNumberOfFreePage; pageNum < disk.getNumberOfPages(); pageNum++) {
 			if (pageIsFree(pageNum))
 				return takeThisPagedAndGetIndex(pageNum);
 		}
-		for (int pageNum = 0; pageNum < lastTakenPageNum; pageNum++) {
+		for (int pageNum = 0; pageNum < firstCandidateToBeNumberOfFreePage; pageNum++) {
 			if (pageIsFree(pageNum))
 				return takeThisPagedAndGetIndex(pageNum);
 		}
@@ -96,9 +94,9 @@ final class DiskIndex {
 	
 	private int takeThisPagedAndGetIndex(int pageNum) {
 		setPageIsFreeOrNot(pageNum, false);
-		lastTakenPageNum = pageNum + 1;
-		if (lastTakenPageNum == disk.getNumberOfPages())
-			lastTakenPageNum = getIndexSizeInPages();
+		firstCandidateToBeNumberOfFreePage = pageNum + 1;
+		if (firstCandidateToBeNumberOfFreePage == disk.getNumberOfPages())
+			firstCandidateToBeNumberOfFreePage = getIndexSizeInPages();
 		return pageNum;
 	}
 
