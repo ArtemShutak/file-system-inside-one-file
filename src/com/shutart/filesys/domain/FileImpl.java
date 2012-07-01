@@ -47,7 +47,7 @@ public final class FileImpl implements IFile{
 	}
 
 	@Override
-	public InputStream getNewInputStream(long startByteIndex) throws FileNotFoundException {
+	public InputStream getNewInputStream(int startByteIndex) throws FileNotFoundException {
 //		if (fromByte >= length())
 //			fromByte = length()-1;
 		return fs.getNewInputStream(this, startByteIndex) ;

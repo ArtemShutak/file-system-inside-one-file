@@ -31,7 +31,7 @@ public interface IFile {
 	 * @throws FileNotFoundException 
 	 */
 	InputStream getNewInputStream() throws FileNotFoundException;
-	InputStream getNewInputStream(long startByteIndex) throws FileNotFoundException;
+	InputStream getNewInputStream(int startByteIndex) throws FileNotFoundException;
 	
 //	boolean canRead(); 
 	boolean isWritable();
