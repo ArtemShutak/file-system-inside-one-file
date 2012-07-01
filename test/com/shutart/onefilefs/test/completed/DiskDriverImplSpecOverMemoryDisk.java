@@ -6,7 +6,7 @@ import com.shutart.filesys.domain.IDiskDriver;
 import com.shutart.onefilefs.test.util.AbstractDiskDriverSpec;
 import com.shutart.onefilefs.test.util.MemoryDisk;
 
-public final class DiskDriverImplSpec extends AbstractDiskDriverSpec {
+public final class DiskDriverImplSpecOverMemoryDisk extends AbstractDiskDriverSpec {
 
 	@Override
 	protected IDisk getDisk(int numberOfPages, int pageSize) {
