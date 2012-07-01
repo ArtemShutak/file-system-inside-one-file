@@ -156,7 +156,7 @@ public final class MemoryFileSystem implements IFileSystem {
 	}
 
 	@Override
-	public InputStream getNewInputStream(IFile file, long startByteIndex) throws FileNotFoundException {
+	public InputStream getNewInputStream(IFile file, int startByteIndex) throws FileNotFoundException {
 		if (!exists(file))
 			throw new FileNotFoundException();
 		return new MyInputStream(startByteIndex,bytesOf(file));

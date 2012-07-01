@@ -24,7 +24,7 @@ public interface IFileSystem {
 
 	OutputStream getNewOutputStream(IFile file, boolean append) throws FileNotFoundException;
 
-	InputStream getNewInputStream(IFile file, long startByteIndex) throws FileNotFoundException ;
+	InputStream getNewInputStream(IFile file, int startByteIndex) throws FileNotFoundException ;
 
 
 	boolean exists(IFile file);
