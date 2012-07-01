@@ -55,7 +55,7 @@ public final class RealFileWrap implements IFile{
 	}
 
 	@Override
-	public InputStream getNewInputStream(long startByteIndex) throws FileNotFoundException{
+	public InputStream getNewInputStream(int startByteIndex) throws FileNotFoundException{
 		throw new UnsupportedOperationException();
 	}
 
