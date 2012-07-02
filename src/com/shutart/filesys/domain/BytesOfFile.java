@@ -16,6 +16,9 @@ public final class BytesOfFile {
 	private List<Integer> numbersOfDiskPages = new ArrayList<Integer>();
 
 	BytesOfFile(IDisk disk, DiskIndex index, int indexOfFirstFilePage) {
+		if (indexOfFirstFilePage < 0)
+			throw new IllegalArgumentException("indexOfFirstFilePage="
+					+ indexOfFirstFilePage);
 		this.disk = disk;
 		this.index = index;
 		numbersOfDiskPages.add(indexOfFirstFilePage);
