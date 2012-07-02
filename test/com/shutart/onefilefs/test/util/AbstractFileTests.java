@@ -38,6 +38,8 @@ public abstract class AbstractFileTests {
 	
 	protected abstract IFile newFile(String name);
 
+	protected abstract void diskDriverReleaseDisk() ;
+
 	@After
 	public void tearDown() throws Exception {
 		file.delete();
@@ -50,6 +52,7 @@ public abstract class AbstractFileTests {
 			Thread.sleep(100);
 			assertFalse(file.exists());
 		}
+		diskDriverReleaseDisk();
 	}
 
 	@Test
@@ -70,6 +73,13 @@ public abstract class AbstractFileTests {
 		assertTrue(file.isWritable());
 		assertTrue(file.length()==0);
 	}
+
+	//TODO
+//	private void printDisk() {
+//		for (int i = 0; i < disk.getNumberOfPages(); i++) {
+//			System.out.println(Arrays.toString(disk.getPageContent(i)));
+//		}
+//	}
 
 	@Test
 	public void fileCreateAndDeleteTest() {

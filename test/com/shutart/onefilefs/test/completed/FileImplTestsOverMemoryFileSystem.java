@@ -14,4 +14,8 @@ public final class FileImplTestsOverMemoryFileSystem extends AbstractFileTests {
 		return new FileImpl(name, fileSys);
 	}
 
+	@Override
+	protected void diskDriverReleaseDisk() {
+	}
+
 }

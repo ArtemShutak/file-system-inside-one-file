@@ -13,14 +13,23 @@ import com.shutart.onefilefs.test.util.AbstractFileTests;
 
 public final class FileImplTestsOverOneFileDisk extends AbstractFileTests {
 
+	private IDisk disk;
+	
 	@Override
 	protected IFile newFile(String name) {
-		IDisk disk = OneFileDisk.getInstance("testPath/" + FSConstans.DISK_NAME,
+		disk = OneFileDisk.getInstance("testPath/" + FSConstans.DISK_NAME,
 				FSConstans.DISK_NUMBER_OF_PAGES, FSConstans.DISK_PAGE_SIZE);
+//		disk = MemoryDisk.getInstance(FSConstans.DISK_NUMBER_OF_PAGES, 
+//				FSConstans.DISK_PAGE_SIZE);
 		IDiskDriver diskDriver = DiskDriverImpl.getDriver4Disk(disk);
 		diskDriver.formatDisk();
 		IFileSystem fs = new FileSysImpl(diskDriver);
 		return new FileImpl(name, fs);
+	}
+	
+	@Override
+	protected void diskDriverReleaseDisk() {
+		DiskDriverImpl.releaseDisk(disk);
 	}
 
 }

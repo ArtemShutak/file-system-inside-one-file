@@ -11,4 +11,8 @@ public final class RealFileTest extends AbstractFileTests {
 		return new RealFileWrap(name);
 	}
 
+	@Override
+	protected void diskDriverReleaseDisk() {
+	}
+
 }
