@@ -14,7 +14,8 @@ public class AllTestsInOne{
      suite.addTest(new JUnit4TestAdapter(MemoryDiskTest.class));
      suite.addTest(new JUnit4TestAdapter(OneFileDiskTest.class));
      suite.addTest(new JUnit4TestAdapter(DiskDriverImplSpecOverMemoryDisk.class));
-
+     suite.addTest(new JUnit4TestAdapter(DiskDriverImplSpecOverOneFileDisk.class));
+     
      return suite; 
    }
 }
