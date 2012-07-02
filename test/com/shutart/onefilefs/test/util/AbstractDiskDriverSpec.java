@@ -58,8 +58,10 @@ public abstract class AbstractDiskDriverSpec {
 	@After
 	public void tearDown() throws Exception {
 		dd.formatDisk();
+		diskDriverReleaseDisk(disk);
 	}
 
+	protected abstract void diskDriverReleaseDisk(IDisk disk) ;
 	@Test
 	public void testIndexStateAfterFormatDisk() {
 		byte[] bytesOfIndex = readBytesOfDiskIndex();
@@ -91,7 +93,6 @@ public abstract class AbstractDiskDriverSpec {
 		copyOfIndex[1] = 0;
 		copyOfIndex[2] = 0;
 		copyOfIndex[3] = 4;
-
 		copyOfIndex[PAGE_SIZE*3 + 4] = 0;
 		
 		assertArrayEquals(copyOfIndex, readBytesOfDiskIndex());
@@ -101,7 +102,7 @@ public abstract class AbstractDiskDriverSpec {
 	public void testInitNewFileMethod4times() {
 		initNewFileAndDeleteSeveralTimes(4);
 	}
-
+	
 	private void initNewFileAndDeleteSeveralTimes(int times) {
 		final byte[] copyOfIndex = copyOfIndexPattern();
 		for (int i = 0, freePageNum = firstFreePageNum(); i < times; i++, freePageNum++) {
@@ -115,7 +116,7 @@ public abstract class AbstractDiskDriverSpec {
 			assertArrayEquals(copyOfIndex, readBytesOfDiskIndex());
 			dd.deleteFile(fileId);		
 			
-			copyOfIndex[i*4] = -1;
+			copyOfIndex[i*4] =     -1;
 			copyOfIndex[i*4 + 1] = -1;
 			copyOfIndex[i*4 + 2] = -1;
 			copyOfIndex[i*4 + 3] = -1;
@@ -168,6 +169,7 @@ public abstract class AbstractDiskDriverSpec {
 		int fileId = dd.initNewFileAndGetFileId();
 		BytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
 		assertEquals(0, bytesOfFile.size());
+		dd.releaseBytesOfFile(fileId);
 	}
 	
 	@Test
@@ -178,6 +180,7 @@ public abstract class AbstractDiskDriverSpec {
 		bytesOfFile.add(b);
 		assertEquals(1, bytesOfFile.size());
 		assertEquals(b, bytesOfFile.get(0));
+		dd.releaseBytesOfFile(fileId);
 	}
 	
 	@Test (expected = IndexOutOfBoundsException.class)
@@ -186,7 +189,9 @@ public abstract class AbstractDiskDriverSpec {
 		BytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
 		byte b = 17;
 		bytesOfFile.add(b);
-		assertEquals(b, bytesOfFile.get(1));
+		dd.releaseBytesOfFile(fileId);
+		
+		bytesOfFile.get(1);
 	}
 	
 	@Test (expected = IndexOutOfBoundsException.class)
@@ -195,7 +200,9 @@ public abstract class AbstractDiskDriverSpec {
 		BytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
 		byte b = 13;
 		bytesOfFile.add(b);
-		assertEquals(b, bytesOfFile.get(-1));
+		dd.releaseBytesOfFile(fileId);
+		
+		bytesOfFile.get(-1);
 	}
 
 	@Test
@@ -208,6 +215,7 @@ public abstract class AbstractDiskDriverSpec {
 		for (int i = 0; i < PAGE_SIZE; i++) {
 			assertEquals(i, bytesOfFile.get(i));
 		}
+		dd.releaseBytesOfFile(fileId);
 	}
 	
 	@Test
@@ -221,6 +229,7 @@ public abstract class AbstractDiskDriverSpec {
 		byte b = 38;
 		bytesOfFile.set(index, b);
 		assertEquals(b, bytesOfFile.get(index));
+		dd.releaseBytesOfFile(fileId);
 	}
 	
 	@Test
@@ -240,6 +249,7 @@ public abstract class AbstractDiskDriverSpec {
 		indexArray[indexOfFirstFreePageInPatternArray()] = 0;
 
 		assertArrayEquals(indexArray, readBytesOfDiskIndex());
+		dd.releaseBytesOfFile(fileId);
 	}
 	
 }

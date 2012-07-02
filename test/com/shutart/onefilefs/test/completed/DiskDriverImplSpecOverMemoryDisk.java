@@ -10,12 +10,17 @@ public final class DiskDriverImplSpecOverMemoryDisk extends AbstractDiskDriverSp
 
 	@Override
 	protected IDisk getDisk(int numberOfPages, int pageSize) {
-		return new MemoryDisk(numberOfPages, pageSize);
+		return MemoryDisk.getInstance(numberOfPages, pageSize);
 	}
 
 	@Override
 	protected IDiskDriver getDiskDriver(IDisk disk) {
 		return DiskDriverImpl.getDriver4Disk(disk);
+	}
+
+	@Override
+	protected void diskDriverReleaseDisk(IDisk disk) {
+		DiskDriverImpl.releaseDisk(disk);
 	}
 
 }

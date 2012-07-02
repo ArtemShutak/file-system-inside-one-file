@@ -70,13 +70,24 @@ public class DiskDriverImpl implements IDiskDriver {
 	}
 
 	
-	private static final Map<IDisk, IDiskDriver> disk2Driver = new HashMap<IDisk, IDiskDriver>();
+	private static final Map<IDisk, DiskDriverImpl> disk2Driver = new HashMap<IDisk, DiskDriverImpl>();
 	public static IDiskDriver getDriver4Disk(IDisk disk) {
-		IDiskDriver driver = disk2Driver.get(disk);
+		DiskDriverImpl driver = disk2Driver.get(disk);
 		if (driver == null){
 			driver = new DiskDriverImpl(disk);
 			disk2Driver.put(disk, driver);
 		}
 		return driver;
+	}
+
+	public static void releaseDisk(IDisk disk) {
+		DiskDriverImpl driver = disk2Driver.remove(disk);
+		driver.releaseBytesOfFile4All();
+	}
+
+	private void releaseBytesOfFile4All() {
+		for (Integer fileId : fileId2Bytes.keySet()) {
+			releaseBytesOfFile(fileId);
+		}
 	}
 }

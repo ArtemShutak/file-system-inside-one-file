@@ -8,7 +8,7 @@ public final class MemoryDiskTest extends AbstractDiskTest {
 
 	@Override
 	public IDisk getNewDisk(int numberOfPages, int pageSize) {
-		return new MemoryDisk(numberOfPages, pageSize);
+		return MemoryDisk.getInstance(numberOfPages, pageSize);
 	}
 
 }
