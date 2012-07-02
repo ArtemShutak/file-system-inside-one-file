@@ -6,7 +6,7 @@ public final class FSConstans {
 	public static final char SEPARATOR = '/';
 	public static final String DISK_NAME = "diskName";
 	public static final int DISK_NUMBER_OF_PAGES = 10;
-	public static final int DISK_PAGE_SIZE = 12;
+	public static final int DISK_PAGE_SIZE = 16;
 
 	private FSConstans(){}
 	
