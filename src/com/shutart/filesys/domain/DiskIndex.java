@@ -70,10 +70,16 @@ final class DiskIndex {
 	private int takeThisFileIdAndGetIndex(int fileId) {
 		int pageNum = getFreePageNumAndTake();
 		setPageNum4FileId(fileId, pageNum);
+		setZeroSize4Page(pageNum);
+		
 		firstCandidateToBeFreeFileId = fileId + 1;
 		if (firstCandidateToBeFreeFileId == disk.getNumberOfPages())
 			firstCandidateToBeFreeFileId = 0;
 		return fileId;
+	}
+
+	private void setZeroSize4Page(int pageNum) {
+		disk.setPageContent(pageNum, 0, new byte[] {0, 0, 0, 0});
 	}
 
 	void setFileIdAsFree(int fileId) {
