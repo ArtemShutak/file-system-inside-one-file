@@ -319,9 +319,7 @@ public class FileSysImpl implements IFileSystem {
 				throw new IOException("Stream already closed");
 			int rez = -1;
 			if (available() > 0){
-				rez = bytes.get(index++);
-				if (rez < 0)
-					rez += 256;
+				rez = bytes.get(index++) & 0xFF;
 			}
 			return rez ;
 		}
