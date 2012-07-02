@@ -14,7 +14,18 @@ public class FileSysImpl implements IFileSystem {
 	private final FileId2FileAttrsMapper fileId2FileAttrs = new FileId2FileAttrsMapper(this);
 
 	public FileSysImpl(IDiskDriver diskDriver) {
+		this(diskDriver, true);
+	}
+	
+	public FileSysImpl(IDiskDriver diskDriver, boolean isNewDisk) {
 		this.diskDriver = diskDriver;
+		if (isNewDisk){
+			diskDriver.formatDisk();
+			int fileId4NamesOfFiles = diskDriver.initNewFileAndGetFileId();
+			if (fileId4NamesOfFiles != FileName2FileIdMapper.FILE_ID_4_THIS_MAP)
+				throw new IllegalStateException("actual fileId=" + fileId4NamesOfFiles);
+			initAttrs(fileId4NamesOfFiles);
+		}
 	}
 
 	private final FileAttrs getDefaultAttrs(){return new FileAttrs(false, FSConstans.START_LAST_MODIF_VAL);}
@@ -50,9 +61,9 @@ public class FileSysImpl implements IFileSystem {
 	}
 	
 	private void deleteFile(int fileId) {
-		diskDriver.deleteFile(fileId);
 		fileId2FileAttrs.deleteAttrs(fileId);
 		fileName2FileId.deleteFileName(fileId);		
+		diskDriver.deleteFile(fileId);
 	}
 
 	@Override
@@ -113,6 +124,15 @@ public class FileSysImpl implements IFileSystem {
 		final Integer fileId = fileName2FileId.get(file.getName());
 		if (fileId == null)
 			throw new IllegalArgumentException();
+		return getNewOutputStream(fileId, attrsOf(fileId), append);
+//		if (append) {
+//			return new AppendedOutputStream(diskDriver, fileId, attrsOf(fileId));
+//		} else {
+//			return new NoAppendedOutputStream(diskDriver, fileId, attrsOf(fileId));
+//		}
+	}
+	
+	OutputStream getNewOutputStream(int fileId, FileAttrs fileAttrs, boolean append){
 		if (append) {
 			return new AppendedOutputStream(diskDriver, fileId, attrsOf(fileId));
 		} else {
@@ -129,6 +149,10 @@ public class FileSysImpl implements IFileSystem {
 		if (fileId == null)
 			throw new IllegalArgumentException();
 		
+		return getNewIntputStream(fileId, startByteIndex);
+	}
+	
+	InputStream getNewIntputStream(int fileId, int startByteIndex) {
 		return new MyInputStream(diskDriver, fileId, startByteIndex);
 	}
 
@@ -156,7 +180,7 @@ public class FileSysImpl implements IFileSystem {
 		return attrsOf(fileName2FileId.get(file.getName()));
 	}
 	
-	private FileAttrs attrsOf(Integer fileId) {
+	FileAttrs attrsOf(Integer fileId) {
 		if (fileId == null)
 			throw new IllegalStateException();
 		FileAttrs rez =  fileId2FileAttrs.getAttrsOf(fileId);
@@ -177,12 +201,18 @@ public class FileSysImpl implements IFileSystem {
 	public boolean initFile(String fileName) {
 		if (exists(fileName))
 			return false;
+		if (fileName.length() > FileName2FileIdMapper.MAX_LENGTH_OF_FILE_NAME)
+			throw new IllegalArgumentException("length of file Name '"+fileName+"' more than " + FileName2FileIdMapper.MAX_LENGTH_OF_FILE_NAME);
 		int newFileId = diskDriver.initNewFileAndGetFileId();
 		fileName2FileId.put(fileName, newFileId);
+		initAttrs(newFileId);
+		return true;
+	}
+
+	private void initAttrs(int newFileId) {
 		FileAttrs attrs = getDefaultAttrs();
 		attrs.setLastModified(System.currentTimeMillis());
 		fileId2FileAttrs.put(newFileId, attrs);
-		return true;
 	}
 
 	@Override
@@ -224,7 +254,7 @@ public class FileSysImpl implements IFileSystem {
 		abstract void writeBody(int b) ;
 		
 		@Override
-		public void close() throws IOException{
+		public void close(){
 			if (isClosed)
 				return;
 			isClosed = true;
@@ -252,18 +282,14 @@ public class FileSysImpl implements IFileSystem {
 
 	private static final class NoAppendedOutputStream extends MyAbstractOutputStream{
 		private int index;
-		private boolean firstOperation = true;
 	
 		NoAppendedOutputStream(IDiskDriver diskDriver, int fileId, FileAttrs attrs) {
 			super(diskDriver, fileId, attrs);
+			bytes.clear();
 		}
 		
 		@Override
 		void writeBody(int b) {
-			if (firstOperation){
-				firstOperation = false;
-				bytes.clear();
-			}
 			if (bytes.size()<index)
 				bytes.set(index, (byte) b);
 			else
@@ -292,13 +318,21 @@ public class FileSysImpl implements IFileSystem {
 			if (isClosed)
 				throw new IOException("Stream already closed");
 			int rez = -1;
-			if (index < bytes.size())
+			if (available() > 0){
 				rez = bytes.get(index++);
+				if (rez < 0)
+					rez += 256;
+			}
 			return rez ;
 		}
 		
 		@Override
-		public void close() throws IOException{
+		public int available() throws IOException {
+			return bytes.size() - index;
+		}
+		
+		@Override
+		public void close() {
 			if (isClosed)
 				return;
 			isClosed = true;
@@ -311,4 +345,26 @@ public class FileSysImpl implements IFileSystem {
 		}
 		
 	}
+
+	void setBytes(int fileId, int startWritePosition, byte[] bytes) {
+		setBytes(fileId, startWritePosition, bytes, 0, bytes.length);
+	}
+	
+	void setBytes(int fileId, int startWritePosition, byte[] bytes, int from, int length) {
+		if (bytes == null)
+			throw new NullPointerException();
+		if (startWritePosition < 0|| from < 0 || length < 0 || from + length > bytes.length)
+			throw new IllegalArgumentException();
+		BytesOfFile bytesOfFile = diskDriver.getBytesOfFile(fileId);
+		if (startWritePosition > bytesOfFile.size())
+			throw new IllegalArgumentException();
+		for (int writeIndex = startWritePosition, i = from; i < from + length; writeIndex++, i++) {
+			if (writeIndex < bytesOfFile.size())
+				bytesOfFile.set(writeIndex, bytes[i]);
+			else
+				bytesOfFile.add(bytes[i]);
+		}
+
+	}
+
 }
