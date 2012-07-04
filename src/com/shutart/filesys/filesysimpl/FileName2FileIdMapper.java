@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 final class FileName2FileIdMapper {
 	static final int FILE_ID_4_THIS_MAP = 0;
@@ -15,12 +19,23 @@ final class FileName2FileIdMapper {
 	private static final int SIZE_OF_ONE_ENTRY = (4 + MAX_LENGTH_OF_FILE_NAME) + 4;
 
 	private final FileSysImpl fileSys;
+	private final Map<String, Integer> fileName2FileIdCache = new HashMap<String, Integer>();
 
 	public FileName2FileIdMapper(FileSysImpl fileSys) {
 		this.fileSys = fileSys;
 	}
 
 	public Integer get(String fileName) {
+		if (fileName2FileIdCache.containsKey(fileName))
+			return fileName2FileIdCache.get(fileName);
+		
+		Integer rez = readFromFileSys(fileName);
+		if (rez != null)
+			fileName2FileIdCache.put(fileName, rez);
+		return rez;
+	}
+
+	private Integer readFromFileSys(String fileName) {
 		if (fileName.length() > MAX_LENGTH_OF_FILE_NAME)
 			return null;
 		InputStream in = fileSys.getNewIntputStream(FILE_ID_4_THIS_MAP, 0);
@@ -57,6 +72,7 @@ final class FileName2FileIdMapper {
 	}
 
 	public void clear() {
+		fileName2FileIdCache.clear();
 		try {
 			OutputStream out = fileSys.getNewOutputStream(FILE_ID_4_THIS_MAP,
 					fileSys.attrsOf(FILE_ID_4_THIS_MAP), false);
@@ -69,6 +85,7 @@ final class FileName2FileIdMapper {
 	public void deleteFileName(int fileId) {
 		if (fileId == FILE_ID_4_THIS_MAP)
 			return;
+		deleteFromCache(fileId);
 		int numberOfEntryWithThisFileId = numberOfEntryWithThisFileId(fileId);
 		if (numberOfEntryWithThisFileId == -1)
 			return;
@@ -77,6 +94,14 @@ final class FileName2FileIdMapper {
 		byte[] bytes = buf.array();
 		int startPos = numberOfEntryWithThisFileId * SIZE_OF_ONE_ENTRY;
 		fileSys.setBytes(FILE_ID_4_THIS_MAP, startPos, bytes);
+	}
+
+	private void deleteFromCache(int fileId) {
+		for (Iterator<Entry<String, Integer>> iterator = fileName2FileIdCache.entrySet().iterator(); iterator.hasNext();) {
+			Entry<String, Integer> entry = iterator.next();
+			if (entry.getValue().equals(fileId))
+				iterator.remove();
+		}
 	}
 
 	private int numberOfEntryWithThisFileId(int fileId) {
@@ -145,6 +170,8 @@ final class FileName2FileIdMapper {
 	public void put(String name, int fileId) {
 		if (fileId == FILE_ID_4_THIS_MAP)
 			throw new IllegalArgumentException();
+		fileName2FileIdCache.put(name, fileId);
+		
 		if (numberOfEntryWithThisFileId(fileId) != -1)
 			throw new IllegalArgumentException("fileId:"+fileId+" already contains");
 		int freeEntryNumber = numberOfFreeEntry();
