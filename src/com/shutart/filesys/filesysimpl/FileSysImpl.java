@@ -1,11 +1,16 @@
-package com.shutart.filesys.domain;
+package com.shutart.filesys.filesysimpl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.shutart.filesys.domain.FileId2FileAttrsMapper.FileAttrs;
+import com.shutart.filesys.domain.FSConstans;
+import com.shutart.filesys.domain.IBytesOfFile;
+import com.shutart.filesys.domain.IDiskDriver;
+import com.shutart.filesys.domain.IFile;
+import com.shutart.filesys.domain.IFileSystem;
+import com.shutart.filesys.filesysimpl.FileId2FileAttrsMapper.FileAttrs;
 
 public class FileSysImpl implements IFileSystem {
 	
@@ -269,7 +274,7 @@ public class FileSysImpl implements IFileSystem {
 	}
 
 	private static abstract class MyAbstractOutputStream extends OutputStream{
-		protected final BytesOfFile bytes;
+		protected final IBytesOfFile bytes;
 		
 		private final IDiskDriver diskDriver;
 		private final int fileId;
@@ -346,7 +351,7 @@ public class FileSysImpl implements IFileSystem {
 	private static final class MyInputStream extends InputStream{
 		
 		private int index;
-		private final BytesOfFile bytes;
+		private final IBytesOfFile bytes;
 		private final IDiskDriver diskDriver;
 		private final int fileId;
 		private boolean isClosed;
@@ -408,7 +413,7 @@ public class FileSysImpl implements IFileSystem {
 			throw new IllegalArgumentException("startWritePosition="
 					+ startWritePosition + " from=" + from + " length="
 					+ length);
-		BytesOfFile bytesOfFile = diskDriver.getBytesOfFile(fileId);
+		IBytesOfFile bytesOfFile = diskDriver.getBytesOfFile(fileId);
 		if (startWritePosition > bytesOfFile.size())
 			throw new IllegalArgumentException();
 		for (int writeIndex = startWritePosition, i = from; i < from + length; writeIndex++, i++) {

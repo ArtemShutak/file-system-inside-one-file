@@ -1,7 +1,11 @@
-package com.shutart.filesys.domain;
+package com.shutart.filesys.driverimpl;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.shutart.filesys.domain.IBytesOfFile;
+import com.shutart.filesys.domain.IDisk;
+import com.shutart.filesys.domain.IDiskDriver;
 
 
 public class DiskDriverImpl implements IDiskDriver {
@@ -24,7 +28,7 @@ public class DiskDriverImpl implements IDiskDriver {
 	
 	@Override
 	public void deleteFile(int fileId) {
-		BytesOfFile bytesOfFile = getBytesOfFile(fileId);
+		IBytesOfFile bytesOfFile = getBytesOfFile(fileId);
 		bytesOfFile.clear();
 		releaseBytesOfFile(fileId);
 		Integer numOfBytesUsers = fileId2NumberOfBytesUsers.get(fileId);
@@ -49,7 +53,7 @@ public class DiskDriverImpl implements IDiskDriver {
 	}
 	
 	@Override
-	public BytesOfFile getBytesOfFile(int fileId) {
+	public IBytesOfFile getBytesOfFile(int fileId) {
 		BytesOfFile rez = fileId2Bytes.get(fileId);
 		if (rez == null){
 			int indexOfFirstFilePage = index.getPageNumBy(fileId);

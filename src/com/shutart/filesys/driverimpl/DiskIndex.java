@@ -1,10 +1,12 @@
-package com.shutart.filesys.domain;
+package com.shutart.filesys.driverimpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+
+import com.shutart.filesys.domain.IDisk;
 
 
 final class DiskIndex {

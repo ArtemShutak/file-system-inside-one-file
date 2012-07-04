@@ -1,4 +1,4 @@
-package com.shutart.filesys.domain;
+package com.shutart.filesys.driverimpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -8,8 +8,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.shutart.filesys.domain.IBytesOfFile;
+import com.shutart.filesys.domain.IDisk;
 
-public final class BytesOfFile {
+
+final class BytesOfFile implements IBytesOfFile {
 
 	private final IDisk disk;
 	private final DiskIndex index;

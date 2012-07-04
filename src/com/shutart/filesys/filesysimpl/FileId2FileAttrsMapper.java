@@ -1,4 +1,4 @@
-package com.shutart.filesys.domain;
+package com.shutart.filesys.filesysimpl;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+
+import com.shutart.filesys.domain.FSConstans;
 
 final class FileId2FileAttrsMapper {
 	static final int FILE_ID = 1;

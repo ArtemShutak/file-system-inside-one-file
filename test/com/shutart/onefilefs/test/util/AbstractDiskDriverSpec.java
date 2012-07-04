@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.shutart.filesys.domain.BytesOfFile;
+import com.shutart.filesys.domain.IBytesOfFile;
 import com.shutart.filesys.domain.IDisk;
 import com.shutart.filesys.domain.IDiskDriver;
 
@@ -167,7 +167,7 @@ public abstract class AbstractDiskDriverSpec {
 	@Test
 	public void byteOfFileShouldHaveZeroSize() {
 		int fileId = dd.initNewFileAndGetFileId();
-		BytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
+		IBytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
 		assertEquals(0, bytesOfFile.size());
 		dd.releaseBytesOfFile(fileId);
 	}
@@ -175,7 +175,7 @@ public abstract class AbstractDiskDriverSpec {
 	@Test
 	public void simpleTestAddAndGetMethodsOfBytesOfFile() {
 		int fileId = dd.initNewFileAndGetFileId();
-		BytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
+		IBytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
 		byte b = (byte) 239;
 		bytesOfFile.add(b);
 		assertEquals(1, bytesOfFile.size());
@@ -186,7 +186,7 @@ public abstract class AbstractDiskDriverSpec {
 	@Test (expected = IndexOutOfBoundsException.class)
 	public void getMethodShouldThrowExceptionIfIndexMoreSize() {
 		int fileId = dd.initNewFileAndGetFileId();
-		BytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
+		IBytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
 		byte b = 17;
 		bytesOfFile.add(b);
 		dd.releaseBytesOfFile(fileId);
@@ -197,7 +197,7 @@ public abstract class AbstractDiskDriverSpec {
 	@Test (expected = IndexOutOfBoundsException.class)
 	public void getMethodShouldThrowExceptionIfIndexLessZero() {
 		int fileId = dd.initNewFileAndGetFileId();
-		BytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
+		IBytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
 		byte b = 13;
 		bytesOfFile.add(b);
 		dd.releaseBytesOfFile(fileId);
@@ -208,7 +208,7 @@ public abstract class AbstractDiskDriverSpec {
 	@Test
 	public void testAddAndGetMethodsOfBytesOfFile() {
 		int fileId = dd.initNewFileAndGetFileId();
-		BytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
+		IBytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
 		for (int i = 0; i < PAGE_SIZE; i++) {
 			bytesOfFile.add((byte) i);
 		}
@@ -221,7 +221,7 @@ public abstract class AbstractDiskDriverSpec {
 	@Test
 	public void testSetMethodOfBytesOfFile() {
 		int fileId = dd.initNewFileAndGetFileId();
-		BytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
+		IBytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
 		for (int i = 0; i < PAGE_SIZE; i++) {
 			bytesOfFile.add((byte) i);
 		}
@@ -235,7 +235,7 @@ public abstract class AbstractDiskDriverSpec {
 	@Test
 	public void testClearMethodOfBytesOfFile() {
 		int fileId = dd.initNewFileAndGetFileId();
-		BytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
+		IBytesOfFile bytesOfFile = dd.getBytesOfFile(fileId);
 		for (int i = 0; i < PAGE_SIZE; i++) {
 			bytesOfFile.add((byte) i);
 		}

@@ -1,4 +1,4 @@
-package com.shutart.filesys.domain;
+package com.shutart.filesys.filesysimpl;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

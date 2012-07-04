@@ -1,14 +1,14 @@
 package com.shutart.onefilefs.test.completed;
 
-import com.shutart.filesys.domain.DiskDriverImpl;
 import com.shutart.filesys.domain.FSConstans;
 import com.shutart.filesys.domain.FileImpl;
-import com.shutart.filesys.domain.FileSysImpl;
 import com.shutart.filesys.domain.IDisk;
 import com.shutart.filesys.domain.IDiskDriver;
 import com.shutart.filesys.domain.IFile;
 import com.shutart.filesys.domain.IFileSystem;
 import com.shutart.filesys.domain.OneFileDisk;
+import com.shutart.filesys.driverimpl.DiskDriverImpl;
+import com.shutart.filesys.filesysimpl.FileSysImpl;
 import com.shutart.onefilefs.test.util.AbstractFileTests;
 
 public final class FileImplTestsOverOneFileDisk extends AbstractFileTests {
