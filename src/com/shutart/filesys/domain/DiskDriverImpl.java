@@ -86,8 +86,12 @@ public class DiskDriverImpl implements IDiskDriver {
 	}
 
 	private void releaseBytesOfFile4All() {
-		for (Integer fileId : fileId2Bytes.keySet()) {
-			releaseBytesOfFile(fileId);
-		}
+//		for (Integer fileId : fileId2Bytes.keySet()) {
+//			releaseBytesOfFile(fileId);
+//		}
+		fileId2Bytes.clear();
+		fileId2NumberOfBytesUsers.clear();
+		//TODO
+		index.releaseAllCounters();
 	}
 }

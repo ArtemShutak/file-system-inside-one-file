@@ -20,6 +20,11 @@ final class DiskIndex {
 //		this.format();
 	}
 	
+	void releaseAllCounters(){
+		firstCandidateToBeFreeFileId = 0;
+		firstCandidateToBeNumberOfFreePage = 0;
+	}
+	
 	int getPageNumBy(int fileId) {
 		try {
 			int[] pageNumAndInnerIndex = calculatePageNumAndInnerIndex4FileId(fileId);
