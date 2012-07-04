@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 final class FileName2FileIdMapper {
 	static final int FILE_ID_4_THIS_MAP = 0;
 	static final int MAX_LENGTH_OF_FILE_NAME = 100;
-	private static final int FREE_ENTRY_MARKER = -1;
+	private static final int FREE_ENTRY_MARKER = -1;//pseudo length of file name
 	private static final int SIZE_OF_ONE_ENTRY = (4 + MAX_LENGTH_OF_FILE_NAME) + 4;
 
 	private final FileSysImpl fileSys;
@@ -38,7 +38,7 @@ final class FileName2FileIdMapper {
 					if (fName.equals(fileName))
 						return dataIn.readInt();
 				} else {
-					dataIn.skip(SIZE_OF_ONE_ENTRY);
+					dataIn.skip(MAX_LENGTH_OF_FILE_NAME + 4);
 				}
 			}
 			return null;
@@ -93,7 +93,37 @@ final class FileName2FileIdMapper {
 					if (readingFileId == fileId)
 						return numberOfEntry;
 				} else {
-					dataIn.skip((4 + MAX_LENGTH_OF_FILE_NAME) + 4);
+					dataIn.skip((MAX_LENGTH_OF_FILE_NAME) + 4);
+				}
+				numberOfEntry++;
+			}
+			return -1;
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		} finally {
+			try {
+				if (dataIn != null)
+					dataIn.close();
+				else if (in != null)
+					in.close();
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+	}
+
+	private int numberOfFreeEntry() {
+		InputStream in = fileSys.getNewIntputStream(FILE_ID_4_THIS_MAP, 0);
+		DataInputStream dataIn = new DataInputStream(
+				new BufferedInputStream(in));
+		try {
+			int numberOfEntry = 0;
+			while (dataIn.available() > 0) {
+				int realLengthOfFileName = dataIn.readInt();
+				if (realLengthOfFileName == FREE_ENTRY_MARKER) {
+					return numberOfEntry;
+				} else {
+					dataIn.skip((MAX_LENGTH_OF_FILE_NAME) + 4);
 				}
 				numberOfEntry++;
 			}
@@ -117,7 +147,7 @@ final class FileName2FileIdMapper {
 			throw new IllegalArgumentException();
 		if (numberOfEntryWithThisFileId(fileId) != -1)
 			throw new IllegalArgumentException("fileId:"+fileId+" already contains");
-		int freeEntryNumber = numberOfEntryWithThisFileId(FREE_ENTRY_MARKER);
+		int freeEntryNumber = numberOfFreeEntry();
 		
 		ByteBuffer buf = ByteBuffer.allocate(SIZE_OF_ONE_ENTRY);
 		buf.putInt(name.length());
@@ -148,4 +178,5 @@ final class FileName2FileIdMapper {
 			}
 		}
 	}
+
 }
