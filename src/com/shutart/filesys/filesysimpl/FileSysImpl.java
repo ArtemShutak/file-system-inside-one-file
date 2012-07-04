@@ -247,18 +247,13 @@ public class FileSysImpl implements IFileSystem {
 	
 	@Override
 	public boolean initFile(String fileName) {
-		long time1 = System.currentTimeMillis();
 		if (exists(fileName))
 			return false;
 		if (fileName.length() > FileName2FileIdMapper.MAX_LENGTH_OF_FILE_NAME)
 			throw new IllegalArgumentException("length of file Name '"+fileName+"' more than " + FileName2FileIdMapper.MAX_LENGTH_OF_FILE_NAME);
 		int newFileId = diskDriver.initNewFileAndGetFileId();
-		long time2 = System.currentTimeMillis();
 		fileName2FileId.put(fileName, newFileId);
-		long time3 = System.currentTimeMillis();
 		initAttrs(newFileId);
-		long time4 = System.currentTimeMillis();
-		System.out.println("time2-1:" + (time2 - time1)/1000.0 + " time3-2:" + (time3 - time2)/1000.0+ " time4-3:" + (time4 - time3)/1000.0);
 		return true;
 	}
 
