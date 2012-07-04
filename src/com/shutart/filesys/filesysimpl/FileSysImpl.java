@@ -166,12 +166,15 @@ public class FileSysImpl implements IFileSystem {
 		return getNewOutputStream(fileId, fileAttrs, append, true);
 	}
 	
+	private static final int DEFAULT_BYTE_BUFFER_SIZE = 8192;
 	OutputStream getNewOutputStream(int fileId, FileAttrs fileAttrs, boolean append, boolean needUpdateFileAttrs){
+		OutputStream out = null;
 		if (append) {
-			return new AppendedOutputStream(diskDriver, fileId, attrsOf(fileId), needUpdateFileAttrs);
+			out = new AppendedOutputStream(diskDriver, fileId);
 		} else {
-			return new NoAppendedOutputStream(diskDriver, fileId, attrsOf(fileId), needUpdateFileAttrs);
+			out = new NoAppendedOutputStream(diskDriver, fileId);
 		}
+		return new MyBufferedOutputStream(out, DEFAULT_BYTE_BUFFER_SIZE, attrsOf(fileId), needUpdateFileAttrs, append);
 	}
 	
 	@Override
@@ -244,13 +247,18 @@ public class FileSysImpl implements IFileSystem {
 	
 	@Override
 	public boolean initFile(String fileName) {
+		long time1 = System.currentTimeMillis();
 		if (exists(fileName))
 			return false;
 		if (fileName.length() > FileName2FileIdMapper.MAX_LENGTH_OF_FILE_NAME)
 			throw new IllegalArgumentException("length of file Name '"+fileName+"' more than " + FileName2FileIdMapper.MAX_LENGTH_OF_FILE_NAME);
 		int newFileId = diskDriver.initNewFileAndGetFileId();
+		long time2 = System.currentTimeMillis();
 		fileName2FileId.put(fileName, newFileId);
+		long time3 = System.currentTimeMillis();
 		initAttrs(newFileId);
+		long time4 = System.currentTimeMillis();
+		System.out.println("time2-1:" + (time2 - time1)/1000.0 + " time3-2:" + (time3 - time2)/1000.0+ " time4-3:" + (time4 - time3)/1000.0);
 		return true;
 	}
 
@@ -273,21 +281,78 @@ public class FileSysImpl implements IFileSystem {
 		return fileName2FileId.get(fileName) != null;
 	}
 
+	private static final class MyBufferedOutputStream extends OutputStream {
+		private final  byte[] buffer;
+		private int count;
+		private final OutputStream out;
+		
+		private final FileAttrs attrs;
+		private final boolean needUpdateFileAttrs;
+
+		MyBufferedOutputStream(OutputStream out, int size, FileAttrs attrs, boolean needUpdateFileAttrs, boolean append) {
+			buffer = new byte[size];
+			this.out = out;
+			this.attrs = attrs;
+			this.needUpdateFileAttrs = needUpdateFileAttrs;
+			if (! append || needUpdateFileAttrs)
+				attrs.setLastModified(System.currentTimeMillis());
+		}
+
+		private void flushBuffer() throws IOException {
+			if (count > 0) {
+				out.write(buffer, 0, count);
+				count = 0;
+				if (needUpdateFileAttrs)
+					attrs.setLastModified(System.currentTimeMillis());
+			}
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			if (count >= buffer.length) {
+				flushBuffer();
+			}
+			buffer[count++] = (byte) b;
+		}
+		@Override
+		public void write(byte b[], int off, int len)
+				throws IOException {
+			if (len >= buffer.length) {
+				flushBuffer();
+				out.write(b, off, len);
+				return;
+			}
+			if (len > buffer.length - count) {
+				flushBuffer();
+			}
+			System.arraycopy(b, off, buffer, count, len);
+			count += len;
+		}
+		@Override
+		public void flush() throws IOException {
+			flushBuffer();
+			out.flush();
+		}
+		
+		@Override
+		public void close() throws IOException {
+			flush();
+			super.close();
+		}
+
+	}
+	
 	private static abstract class MyAbstractOutputStream extends OutputStream{
 		protected final IBytesOfFile bytes;
 		
 		private final IDiskDriver diskDriver;
 		private final int fileId;
-		private final FileAttrs attrs;
 		private boolean isClosed;
-		private final boolean needUpdateFileAttrs;
 		
-		MyAbstractOutputStream(IDiskDriver diskDriver, int fileId, FileAttrs attrs, boolean needUpdateFileAttrs){
+		MyAbstractOutputStream(IDiskDriver diskDriver, int fileId){
 			this.diskDriver = diskDriver;
 			this.fileId = fileId;
 			this.bytes = diskDriver.getBytesOfFile(fileId);
-			this.attrs = attrs;
-			this.needUpdateFileAttrs = needUpdateFileAttrs;
 		}
 		
 		@Override
@@ -295,16 +360,15 @@ public class FileSysImpl implements IFileSystem {
 			if (isClosed)
 				throw new IOException("Stream already closed");
 			writeBody(b);
-			if (needUpdateFileAttrs)
-				attrs.setLastModified(System.currentTimeMillis());
 		}
 		
 		abstract void writeBody(int b) ;
 		
 		@Override
-		public void close(){
+		public void close() throws IOException{
 			if (isClosed)
 				return;
+			super.flush();
 			isClosed = true;
 			try {
 				super.close();
@@ -318,8 +382,8 @@ public class FileSysImpl implements IFileSystem {
 
 	private static final class AppendedOutputStream extends MyAbstractOutputStream{
 	
-		AppendedOutputStream(IDiskDriver diskDriver, int fileId, FileAttrs attrs, boolean needUpdateFileAttrs) {
-			super(diskDriver, fileId,attrs, needUpdateFileAttrs);
+		AppendedOutputStream(IDiskDriver diskDriver, int fileId) {
+			super(diskDriver, fileId);
 		}
 		
 		@Override
@@ -331,11 +395,9 @@ public class FileSysImpl implements IFileSystem {
 	private static final class NoAppendedOutputStream extends MyAbstractOutputStream{
 		private int index;
 	
-		NoAppendedOutputStream(IDiskDriver diskDriver, int fileId, FileAttrs attrs, boolean needUpdateFileAttrs) {
-			super(diskDriver, fileId, attrs, needUpdateFileAttrs);
+		NoAppendedOutputStream(IDiskDriver diskDriver, int fileId) {
+			super(diskDriver, fileId);
 			bytes.clear();
-			if (needUpdateFileAttrs)
-				attrs.setLastModified(System.currentTimeMillis());
 		}
 		
 		@Override
