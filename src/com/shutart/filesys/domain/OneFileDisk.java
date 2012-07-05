@@ -1,12 +1,12 @@
 package com.shutart.filesys.domain;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,12 +68,14 @@ public final class OneFileDisk extends AbstractDisk implements IDisk{
 	private final FileChannel channel;
 	private final RandomAccessFile  raf;
 	private final File file;
+	private final FileLock lock;
 
 	private OneFileDisk(File file, int numberOfPages, int pageSize) {
 		super(numberOfPages, pageSize);
 		
 		RandomAccessFile  tmpRaf = null;
 		FileChannel tmpChannel = null;
+		FileLock tmpLock = null;
 		this.file = file;
 		try {
 			if (!file.exists())
@@ -82,11 +84,19 @@ public final class OneFileDisk extends AbstractDisk implements IDisk{
 				throw new IllegalArgumentException(numberOfPages*pageSize +" > "+ file.getFreeSpace());
 			tmpRaf = new RandomAccessFile(file, "rw");
 			tmpChannel = tmpRaf.getChannel();
-		} catch (FileNotFoundException e) {
-			processCatchCase(tmpRaf, tmpChannel, e);
+			tmpLock = tmpChannel.tryLock();
+			if (tmpLock == null){
+				releaseResourses(tmpRaf, tmpChannel, tmpLock);
+				throw new IllegalStateException("This file is used by another process.");
+			}
+		} catch (IOException e) {
+			releaseResourses(tmpRaf, tmpChannel, tmpLock);
+			throw new IllegalStateException(e);
 		} 
 		this.channel = tmpChannel;
 		this.raf = tmpRaf;
+		this.lock = tmpLock;
+		
 	}
 
 	private void allocateDiskSpace() {
@@ -102,17 +112,18 @@ public final class OneFileDisk extends AbstractDisk implements IDisk{
 		}
 	}
 
-	private static void processCatchCase(RandomAccessFile raf, FileChannel channel,
-			Exception e) {
+	private static void releaseResourses(RandomAccessFile raf, FileChannel channel,
+			FileLock lock) {
 		try {
 			if (channel != null)
 				channel.close();
 			if (raf != null)
 				raf.close();
+			if (lock != null)
+				lock.release();
 		} catch (IOException e1) {
 			throw new IllegalStateException(e1);
 		}
-		throw new IllegalStateException(e);
 	}
 	
 	@Override
@@ -152,16 +163,14 @@ public final class OneFileDisk extends AbstractDisk implements IDisk{
 
 	@Override
 	public boolean delete() {
-		boolean fileDeleted = file.delete();
-		if (fileDeleted){
-			try {
-				channel.close();
-				raf.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		try {
+			lock.release();
+			raf.close();
+			channel.close();
+			return file.delete() ;
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
 		}
-		return fileDeleted ;
 	}
 	
 	@Override
