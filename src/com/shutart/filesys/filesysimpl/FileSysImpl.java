@@ -66,8 +66,7 @@ public class FileSysImpl implements IFileSystem {
 		Integer fileId = fileName2FileId.get(fileName);
 		if (fileId == null)
 			return false;
-		deleteFile(fileId );
-		return true;
+		return deleteFile(fileId );
 	}
 
 
@@ -78,14 +77,15 @@ public class FileSysImpl implements IFileSystem {
 		Integer fileId = fileName2FileId.get(file.getName());
 		if (fileId == null)
 			return false;
-		deleteFile(fileId);
-		return true;
+		return deleteFile(fileId);
 	}
 	
-	private void deleteFile(int fileId) {
+	private boolean deleteFile(int fileId) {
+		if (! diskDriver.deleteFile(fileId))
+			return false;
 		fileId2FileAttrs.deleteAttrs(fileId);
-		fileName2FileId.deleteFileName(fileId);		
-		diskDriver.deleteFile(fileId);
+		fileName2FileId.deleteFileName(fileId);
+		return true;
 	}
 
 	@Override
@@ -336,6 +336,7 @@ public class FileSysImpl implements IFileSystem {
 		@Override
 		public void close() throws IOException {
 			flush();
+			out.close();
 			super.close();
 		}
 
@@ -369,12 +370,12 @@ public class FileSysImpl implements IFileSystem {
 				return;
 			super.flush();
 			isClosed = true;
+			diskDriver.releaseBytesOfFile(fileId);
 			try {
 				super.close();
 			} catch (IOException e) {
 				throw new IllegalStateException(e);
 			}
-			diskDriver.releaseBytesOfFile(fileId);
 		}
 		
 	}
@@ -474,33 +475,41 @@ public class FileSysImpl implements IFileSystem {
 			throw new IndexOutOfBoundsException("startWritePosition="
 					+ startWritePosition + " from=" + from + " length="
 					+ length);
-		IBytesOfFile bytesOfFile = diskDriver.getBytesOfFile(fileId);
-		if (startWritePosition > bytesOfFile.size())
-			throw new IllegalArgumentException();
-		for (int writeIndex = startWritePosition, i = from; i < from + length; writeIndex++, i++) {
-			if (writeIndex < bytesOfFile.size())
-				bytesOfFile.set(writeIndex, bytes[i]);
-			else
-				bytesOfFile.add(bytes[i]);
+		try{
+			IBytesOfFile bytesOfFile = diskDriver.getBytesOfFile(fileId);
+			if (startWritePosition > bytesOfFile.size())
+				throw new IllegalArgumentException();
+			for (int writeIndex = startWritePosition, i = from; i < from
+					+ length; writeIndex++, i++) {
+				if (writeIndex < bytesOfFile.size())
+					bytesOfFile.set(writeIndex, bytes[i]);
+				else
+					bytesOfFile.add(bytes[i]);
+			}
+			if (fileId != FileId2FileAttrsMapper.FILE_ID)
+				attrsOf(fileId).setLastModified(System.currentTimeMillis());
+		}finally{
+			diskDriver.releaseBytesOfFile(fileId);			
 		}
-		diskDriver.releaseBytesOfFile(fileId);
-		if (fileId != FileId2FileAttrsMapper.FILE_ID)
-			attrsOf(fileId).setLastModified(System.currentTimeMillis());
 	}
 
 	private static final byte[] NULL_BYTE_ARRAY = {};
 	@Override
 	public byte[] getBytes(IFile file, int fromPosition, int length) {
-		if (! exists(file) || fromPosition > file.length())
+		if (!exists(file) || fromPosition > file.length())
 			return NULL_BYTE_ARRAY;
 		int fileId = fileName2FileId.get(file.getName());
-		IBytesOfFile bytesOfFile = diskDriver.getBytesOfFile(fileId );
-		byte[] rez = new byte[Math.min(length, (int) lengthByFileId(fileId) - fromPosition)];
-		for (int i = 0, j = fromPosition; i < rez.length; i++, j++) {
-			rez[i] = (byte) bytesOfFile.get(j);
+		try {
+			IBytesOfFile bytesOfFile = diskDriver.getBytesOfFile(fileId);
+			byte[] rez = new byte[Math.min(length, (int) lengthByFileId(fileId)
+					- fromPosition)];
+			for (int i = 0, j = fromPosition; i < rez.length; i++, j++) {
+				rez[i] = (byte) bytesOfFile.get(j);
+			}
+			return rez;
+		} finally {
+			diskDriver.releaseBytesOfFile(fileId);
 		}
-		diskDriver.releaseBytesOfFile(fileId);
-		return rez;
 	}
 
 	@Override

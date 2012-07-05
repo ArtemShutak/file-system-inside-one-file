@@ -14,6 +14,8 @@ public class DiskDriverImpl implements IDiskDriver {
 	private final IDisk disk;
 	private final Map<Integer,BytesOfFile> fileId2Bytes = new HashMap<Integer, BytesOfFile>();
 	private final Map<Integer, Integer> fileId2NumberOfBytesUsers = new HashMap<Integer, Integer>();
+	
+//	private final Object monitor = new Object();
 
 	private DiskDriverImpl(IDisk disk) {
 		this.disk = disk;
@@ -23,21 +25,29 @@ public class DiskDriverImpl implements IDiskDriver {
 	
 	@Override
 	public int initNewFileAndGetFileId() {
-		return index.getFreeFileIdAndTake();
+//		synchronized (monitor) {
+			return index.getFreeFileIdAndTake();			
+//		}
 	}
 	
 	@Override
-	public void deleteFile(int fileId) {
-		IBytesOfFile bytesOfFile = getBytesOfFile(fileId);
-		bytesOfFile.clear();
-		releaseBytesOfFile(fileId);
-		Integer numOfBytesUsers = fileId2NumberOfBytesUsers.get(fileId);
-		if (numOfBytesUsers != null && numOfBytesUsers != 0){
-			
-		}
-		int firstPageNum = index.getPageNumBy(fileId);
-		index.setPageAsFree(firstPageNum);
-		index.setFileIdAsFree(fileId);
+	public boolean deleteFile(int fileId) {
+//		synchronized (monitor) {
+			Integer countOfFileUsers = fileId2NumberOfBytesUsers.get(fileId);
+			if (countOfFileUsers != null && countOfFileUsers != 0)
+				return false;
+			IBytesOfFile bytesOfFile = getBytesOfFile(fileId);
+			bytesOfFile.clear();
+			releaseBytesOfFile(fileId);
+			countOfFileUsers = fileId2NumberOfBytesUsers.get(fileId);
+			if (countOfFileUsers != null && countOfFileUsers != 0){
+				throw new IllegalStateException();
+			}
+			int firstPageNum = index.getPageNumBy(fileId);
+			index.setPageAsFree(firstPageNum);
+			index.setFileIdAsFree(fileId);	
+			return true;
+//		}
 	}
 	
 	@Override
@@ -76,17 +86,21 @@ public class DiskDriverImpl implements IDiskDriver {
 	
 	private static final Map<IDisk, DiskDriverImpl> disk2Driver = new HashMap<IDisk, DiskDriverImpl>();
 	public static IDiskDriver getDriver4Disk(IDisk disk) {
-		DiskDriverImpl driver = disk2Driver.get(disk);
-		if (driver == null){
-			driver = new DiskDriverImpl(disk);
-			disk2Driver.put(disk, driver);
-		}
-		return driver;
+//		synchronized (disk2Driver) {
+			DiskDriverImpl driver = disk2Driver.get(disk);
+			if (driver == null){
+				driver = new DiskDriverImpl(disk);
+				disk2Driver.put(disk, driver);
+			}
+			return driver;			
+//		}
 	}
 
 	public static void releaseDisk(IDisk disk) {
-		DiskDriverImpl driver = disk2Driver.remove(disk);
-		driver.releaseBytesOfFile4All();
+//		synchronized (disk2Driver) {
+			DiskDriverImpl driver = disk2Driver.remove(disk);
+			driver.releaseBytesOfFile4All();			
+//		}
 	}
 
 	private void releaseBytesOfFile4All() {
