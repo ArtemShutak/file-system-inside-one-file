@@ -14,8 +14,8 @@ final class DiskIndex {
 	private static final int FREE_FILE_ID = -1;
 	
 	private final IDisk disk;
-	private int firstCandidateToBeFreeFileId;
-	private int firstCandidateToBeNumberOfFreePage;
+	private volatile int firstCandidateToBeFreeFileId;
+	private volatile int firstCandidateToBeNumberOfFreePage;
 
 	DiskIndex(IDisk disk) {
 		this.disk = disk;

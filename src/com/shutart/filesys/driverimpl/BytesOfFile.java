@@ -16,14 +16,16 @@ final class BytesOfFile implements IBytesOfFile {
 
 	private final IDisk disk;
 	private final DiskIndex index;
-	private List<Integer> numbersOfDiskPages = new ArrayList<Integer>();
+	private final List<Integer> numbersOfDiskPages = new ArrayList<Integer>();
+	private final Object monitor;
 
-	BytesOfFile(IDisk disk, DiskIndex index, int indexOfFirstFilePage) {
+	BytesOfFile(IDisk disk, DiskIndex index, int indexOfFirstFilePage, Object monitor) {
 		if (indexOfFirstFilePage < 0)
 			throw new IllegalArgumentException("indexOfFirstFilePage="
 					+ indexOfFirstFilePage);
 		this.disk = disk;
 		this.index = index;
+		this.monitor = monitor;
 		numbersOfDiskPages.add(indexOfFirstFilePage);
 		initNumbersOfDiskPages(indexOfFirstFilePage);
 	}
@@ -47,10 +49,12 @@ final class BytesOfFile implements IBytesOfFile {
 
 	public int size() {
 		try {
-			byte[] buf = disk.getPageContent(numbersOfDiskPages.get(0), 0, 4);
-			DataInputStream r = new DataInputStream(new ByteArrayInputStream(
-					buf));
-			return r.readInt();
+			synchronized (monitor) {
+				byte[] buf = disk.getPageContent(numbersOfDiskPages.get(0), 0, 4);
+				DataInputStream r = new DataInputStream(new ByteArrayInputStream(
+						buf));
+				return r.readInt();
+			}
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
@@ -58,30 +62,34 @@ final class BytesOfFile implements IBytesOfFile {
 
 	private void setSize(int newSize) {
 		try {
-			ByteArrayOutputStream byteArray = new ByteArrayOutputStream(4);
-			DataOutputStream r = new DataOutputStream(byteArray );
-			r.writeInt(newSize); 
-			disk.setPageContent(numbersOfDiskPages.get(0), 0, byteArray.toByteArray());
+			synchronized (monitor) {
+				ByteArrayOutputStream byteArray = new ByteArrayOutputStream(4);
+				DataOutputStream r = new DataOutputStream(byteArray );
+				r.writeInt(newSize); 
+				disk.setPageContent(numbersOfDiskPages.get(0), 0, byteArray.toByteArray());
+			}
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
 	public void add(byte b) {
-		int size = size();//absoluteIndex4NewElem
-		int[] pageNumAndInnerIndex = calculatePageNumAndInnerIndex(size);
-		int relativePageNum = pageNumAndInnerIndex[0];
-		int innerIndex = pageNumAndInnerIndex[1];
-		if (innerIndex != 0){
-			disk.setByte(numbersOfDiskPages.get(relativePageNum), innerIndex, b);
-		}else{
-			assert relativePageNum == numbersOfDiskPages.size();
-			int newPageNum = index.getFreePageNumAndTake();
-			numbersOfDiskPages.add(newPageNum);
-			setReferenceOnNewPage(numbersOfDiskPages.get(relativePageNum - 1), newPageNum);
-			disk.setByte(numbersOfDiskPages.get(relativePageNum), innerIndex, b);
+		synchronized (monitor) {
+			int size = size();//absoluteIndex4NewElem
+			int[] pageNumAndInnerIndex = calculatePageNumAndInnerIndex(size);
+			int relativePageNum = pageNumAndInnerIndex[0];
+			int innerIndex = pageNumAndInnerIndex[1];
+			if (innerIndex != 0){
+				disk.setByte(numbersOfDiskPages.get(relativePageNum), innerIndex, b);
+			}else{
+				assert relativePageNum == numbersOfDiskPages.size();
+				int newPageNum = index.getFreePageNumAndTake();
+				numbersOfDiskPages.add(newPageNum);
+				setReferenceOnNewPage(numbersOfDiskPages.get(relativePageNum - 1), newPageNum);
+				disk.setByte(numbersOfDiskPages.get(relativePageNum), innerIndex, b);
+			}
+			setSize(size + 1);
 		}
-		setSize(size + 1);
 	}
 
 //	private boolean thisPageCanHasThisInnerIndex(int pageNum, int innnerIndex) {
@@ -102,30 +110,36 @@ final class BytesOfFile implements IBytesOfFile {
 	}
 
 	public void clear() {
-		for (int lastElemIndex = numbersOfDiskPages.size()-1; 
-				lastElemIndex > 0; lastElemIndex--) {
-			int pageNum = numbersOfDiskPages.remove(lastElemIndex);
-			index.setPageAsFree(pageNum);
+		synchronized (monitor) {
+			for (int lastElemIndex = numbersOfDiskPages.size()-1; 
+					lastElemIndex > 0; lastElemIndex--) {
+				int pageNum = numbersOfDiskPages.remove(lastElemIndex);
+				index.setPageAsFree(pageNum);
+			}
+			setSize(0);
+			assert numbersOfDiskPages.size() == 1;
 		}
-		setSize(0);
-		assert numbersOfDiskPages.size() == 1;
 	}
 
 
 	public void set(int index, byte b) {
-		if (index >= size())
-			throw new IndexOutOfBoundsException("index:" + index + " >= "
-					+ " size:" + size());
-		int[] pageNumAndInnerIndex = calculateRealPageNumAndInnerIndex(index);
-		disk.setByte(pageNumAndInnerIndex[0], pageNumAndInnerIndex[1], b);
+		synchronized (monitor) {
+			if (index >= size())
+				throw new IndexOutOfBoundsException("index:" + index + " >= "
+						+ " size:" + size());
+			int[] pageNumAndInnerIndex = calculateRealPageNumAndInnerIndex(index);
+			disk.setByte(pageNumAndInnerIndex[0], pageNumAndInnerIndex[1], b);
+		}
 	}
 
 	public int get(int i) {
-		if (i < 0 || i >= size())
-			throw new IndexOutOfBoundsException("index:" + i + " >= "
-					+ " size:" + size());
-		int[] pageNumAndInnerIndex = calculateRealPageNumAndInnerIndex(i);
-		return disk.getByte(pageNumAndInnerIndex[0], pageNumAndInnerIndex[1]);
+		synchronized (monitor) {
+			if (i < 0 || i >= size())
+				throw new IndexOutOfBoundsException("index:" + i + " >= "
+						+ " size:" + size());
+			int[] pageNumAndInnerIndex = calculateRealPageNumAndInnerIndex(i);
+			return disk.getByte(pageNumAndInnerIndex[0], pageNumAndInnerIndex[1]);
+		}
 	}
 
 	private int[] calculatePageNumAndInnerIndex(int abstractByteNumber) {
