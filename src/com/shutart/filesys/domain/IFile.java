@@ -33,6 +33,19 @@ public interface IFile {
 	InputStream getNewInputStream() throws FileNotFoundException;
 	InputStream getNewInputStream(int startByteIndex) throws FileNotFoundException;
 	
+	byte[] getBytes(int fromPosition, int length);
+
+	boolean setBytes(int fromPosition, byte[] bytes);
+	/**
+	 * 
+	 * @param fromPosition
+	 * @param bytes
+	 * @param startByte
+	 * @param length
+	 * @return <code>false</code> if fromPosition > {@link #length()}
+	 */
+	boolean setBytes(int fromPosition, byte[] bytes, int startByte, int length);
+	
 //	boolean canRead(); 
 	boolean isWritable();
 

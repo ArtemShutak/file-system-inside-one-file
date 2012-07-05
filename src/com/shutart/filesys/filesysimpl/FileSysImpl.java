@@ -100,6 +100,10 @@ public class FileSysImpl implements IFileSystem {
 		Integer fileId = fileName2FileId.get(file.getName());
 		if (fileName2FileId == null)
 			throw new IllegalArgumentException();
+		return lengthByFileId(fileId);
+	}
+
+	private long lengthByFileId(int fileId) {
 		int size = diskDriver.getBytesOfFile(fileId).size();
 		diskDriver.releaseBytesOfFile(fileId);
 		return size;
@@ -467,7 +471,7 @@ public class FileSysImpl implements IFileSystem {
 			throw new NullPointerException();
 		if (startWritePosition < 0 || from < 0 || length < 0
 				|| from + length > bytes.length)
-			throw new IllegalArgumentException("startWritePosition="
+			throw new IndexOutOfBoundsException("startWritePosition="
 					+ startWritePosition + " from=" + from + " length="
 					+ length);
 		IBytesOfFile bytesOfFile = diskDriver.getBytesOfFile(fileId);
@@ -479,8 +483,36 @@ public class FileSysImpl implements IFileSystem {
 			else
 				bytesOfFile.add(bytes[i]);
 		}
+		diskDriver.releaseBytesOfFile(fileId);
 		if (fileId != FileId2FileAttrsMapper.FILE_ID)
 			attrsOf(fileId).setLastModified(System.currentTimeMillis());
+	}
+
+	private static final byte[] NULL_BYTE_ARRAY = {};
+	@Override
+	public byte[] getBytes(IFile file, int fromPosition, int length) {
+		if (! exists(file) || fromPosition > file.length())
+			return NULL_BYTE_ARRAY;
+		int fileId = fileName2FileId.get(file.getName());
+		IBytesOfFile bytesOfFile = diskDriver.getBytesOfFile(fileId );
+		byte[] rez = new byte[Math.min(length, (int) lengthByFileId(fileId) - fromPosition)];
+		for (int i = 0, j = fromPosition; i < rez.length; i++, j++) {
+			rez[i] = (byte) bytesOfFile.get(j);
+		}
+		diskDriver.releaseBytesOfFile(fileId);
+		return rez;
+	}
+
+	@Override
+	public boolean setBytes(IFile file, int fromPosition, byte[] bytes,
+			int startByte, int length) {
+		if (! file.exists())
+			initFile(file);
+		if (fromPosition > file.length())
+			return false;
+		int fileId = fileName2FileId.get(file.getName());
+		setBytes(fileId, fromPosition, bytes, startByte, Math.min(length, bytes.length - startByte));
+		return true;
 	}
 
 }

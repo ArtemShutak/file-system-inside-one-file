@@ -52,6 +52,18 @@ public final class FileImpl implements IFile{
 //			fromByte = length()-1;
 		return fs.getNewInputStream(this, startByteIndex) ;
 	}
+	@Override
+	public byte[] getBytes(int fromPosition, int length){
+		return fs.getBytes(this, fromPosition, length);
+	}
+	@Override
+	public boolean setBytes(int fromPosition, byte[] bytes){
+		return setBytes(fromPosition, bytes, 0, bytes.length);
+	}
+	@Override
+	public boolean setBytes(int fromPosition, byte[] bytes, int startByte, int length){
+		return fs.setBytes(this, fromPosition, bytes, startByte, length);
+	}
 
 	@Override
 	public boolean isWritable() {

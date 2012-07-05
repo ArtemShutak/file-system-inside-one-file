@@ -33,5 +33,10 @@ public interface IFileSystem {
 
 	boolean initFile(String fileName);
 
+	byte[] getBytes(IFile file, int fromPosition, int length);
+
+	boolean setBytes(IFile file, int fromPosition, byte[] bytes,
+			int startByte, int length);
+
 	
 }

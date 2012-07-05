@@ -223,6 +223,42 @@ public final class MemoryFileSystem implements IFileSystem {
 		return fFiles.values().contains(file);
 	}
 
+	private static final byte[] NULL_BYTE_ARRAY = {};
+	@Override
+	public byte[] getBytes(IFile file, int fromPosition, int length) {
+		if (! exists(file) || fromPosition > file.length())
+			return NULL_BYTE_ARRAY;
+		List<Byte> bytes = bytesOf(file);
+		byte[] rez = new byte[Math.min(length, (int) file.length() - fromPosition)];
+		for (int i = 0, j = fromPosition; i < rez.length; i++, j++) {
+			rez[i] = (byte) bytes.get(j);
+		}
+		return rez;
+	}
+
+	@Override
+	public boolean setBytes(IFile file, int fromPosition, byte[] bytes,
+			int startByte, int length) {
+		if (! file.exists())
+			initFile(file);
+		if (fromPosition > file.length())
+			return false;
+		length = Math.min(length, bytes.length - startByte);
+		if (fromPosition < 0 || startByte < 0 || length < 0
+				|| startByte + length > bytes.length)
+			throw new IndexOutOfBoundsException("startWritePosition="
+					+ fromPosition + " from=" + startByte + " length="
+					+ length);
+		List<Byte> listBytes = bytesOf(file);
+		for (int writeIndex = fromPosition, i = startByte; i < startByte + length; writeIndex++, i++) {
+			if (writeIndex < listBytes.size())
+				listBytes.set(writeIndex, bytes[i]);
+			else
+				listBytes.add(bytes[i]);
+		}
+		return true;
+	}
+
 
 
 }

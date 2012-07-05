@@ -49,7 +49,8 @@ public abstract class AbstractFileTests {
 			in.close();
 		if (file.exists()){
 			file.delete();
-			Thread.sleep(100);
+			Thread.sleep(1000);
+//TODO
 			assertFalse(file.exists());
 		}
 		diskDriverReleaseDisk();
@@ -350,5 +351,62 @@ public abstract class AbstractFileTests {
 		} catch (IOException e) {
 			fail();
 		}
+	}
+	
+	@Test
+	public void testSimpleSetAndGetBytesMethods(){
+		byte[] bytes = new byte[]{1,2,3};
+		assertTrue(file.setBytes(0, bytes ));
+		assertArrayEquals(bytes, file.getBytes(0, 3));		
+	}
+	
+	@Test
+	public void testDoubleSetAndOneGetBytesMethods(){
+		byte[] bytes1 = new byte[]{1,2,3};
+		assertTrue(file.setBytes(0, bytes1 ));
+		byte[] bytes2 = new byte[]{4,5,6,7};
+		assertTrue(file.setBytes(bytes1.length, bytes2 ));
+		assertArrayEquals(new byte[]{1,2,3,4,5,6,7}, file.getBytes(0, 7));		
+	}
+	
+	@Test
+	public void getMethodShouldNotThrowAnExceptionIfLengthParameterMoreThanBounds(){
+		byte[] bytes = new byte[]{1,2,3,4};
+		assertTrue(file.setBytes(0, bytes));
+		assertArrayEquals(new byte[]{3,4}, file.getBytes(2, 100));		
+	}
+	
+	@Test
+	public void getMethodShouldReturnEmptyArrayIfFromPositionMoreThanFileSize(){
+		byte[] bytes = new byte[]{1,2,3,4};
+		assertTrue(file.setBytes(0, bytes));
+		assertArrayEquals(new byte[]{}, file.getBytes(10, 100));		
+	}
+	
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void getMethodShouldThrowExceptionIfFromPositionLessThanZero(){
+		byte[] bytes = new byte[]{1,2,3,4};
+		assertTrue(file.setBytes(0, bytes));
+		assertArrayEquals(new byte[]{}, file.getBytes(-1, 100));		
+	}
+	
+	@Test
+	public void setMethodShouldCreateFile(){
+		assertTrue(file.setBytes(0, new byte[]{}));
+		assertTrue(file.exists());
+	}
+	
+	@Test
+	public void testComplexSetMethod(){
+		byte[] bytes = {7,8,9,10,11};
+		assertTrue(file.setBytes(0, bytes, 2, 2));
+		assertArrayEquals(new byte[]{9, 10}, file.getBytes(0, 2));
+	}
+	
+	@Test
+	public void complexSetMethodShouldNotThrowExceptionIfLengthTooBig(){
+		byte[] bytes = {7,8,9,10,11};
+		assertTrue(file.setBytes(0, bytes, 2, 100));
+		assertArrayEquals(new byte[]{9, 10, 11}, file.getBytes(0, 100));
 	}
 }
