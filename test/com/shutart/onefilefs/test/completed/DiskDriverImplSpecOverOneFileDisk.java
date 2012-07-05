@@ -6,7 +6,7 @@ import com.shutart.filesys.domain.IDisk;
 import com.shutart.filesys.domain.IDiskDriver;
 import com.shutart.filesys.driverimpl.DiskDriverImpl;
 import com.shutart.filesys.onefiledisk.OneFileDisk;
-import com.shutart.onefilefs.test.util.AbstractDiskDriverSpec;
+import com.shutart.onefilefs.test.abstracttests.AbstractDiskDriverSpec;
 
 public final class DiskDriverImplSpecOverOneFileDisk extends AbstractDiskDriverSpec {
 

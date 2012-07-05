@@ -3,7 +3,7 @@ package com.shutart.onefilefs.test.completed;
 import com.shutart.filesys.domain.FileImpl;
 import com.shutart.filesys.domain.IFile;
 import com.shutart.filesys.domain.IFileSystem;
-import com.shutart.onefilefs.test.util.AbstractFileTests;
+import com.shutart.onefilefs.test.abstracttests.AbstractFileTests;
 import com.shutart.onefilefs.test.util.MemoryFileSystem;
 
 public final class FileImplTestsOverMemoryFileSystem extends AbstractFileTests {

@@ -3,7 +3,7 @@ package com.shutart.onefilefs.test.completed;
 import com.shutart.filesys.domain.IDisk;
 import com.shutart.filesys.domain.IDiskDriver;
 import com.shutart.filesys.driverimpl.DiskDriverImpl;
-import com.shutart.onefilefs.test.util.AbstractDiskDriverSpec;
+import com.shutart.onefilefs.test.abstracttests.AbstractDiskDriverSpec;
 import com.shutart.onefilefs.test.util.MemoryDisk;
 
 public final class DiskDriverImplSpecOverMemoryDisk extends AbstractDiskDriverSpec {

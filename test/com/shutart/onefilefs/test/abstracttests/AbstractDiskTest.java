@@ -1,4 +1,4 @@
-package com.shutart.onefilefs.test.util;
+package com.shutart.onefilefs.test.abstracttests;
 
 import static org.junit.Assert.*;
 

@@ -1,4 +1,4 @@
-package com.shutart.onefilefs.test.util;
+package com.shutart.onefilefs.test.abstracttests;
 
 import static org.junit.Assert.*;
 
@@ -48,7 +48,7 @@ public abstract class AbstractFileTests {
 		if (in != null)
 			in.close();
 		if (file.exists()){
-			file.delete();
+			assertTrue(file.delete());
 			Thread.sleep(1000);
 //TODO
 			assertFalse(file.exists());
