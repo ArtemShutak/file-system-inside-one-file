@@ -113,6 +113,37 @@ public abstract class AbstractFileTests {
 	}
 	
 	@Test
+	public void fileCreateAndDeleteTest2() {
+		assertFalse(file.exists());
+		assertTrue(file.createNewFile());
+		assertTrue(file.exists());
+//		
+		try {
+			out = file.getNewOutputStream(true);
+		} catch (FileNotFoundException e1) {
+			fail();
+		}
+		try {
+			out.write(10);
+			out.flush();
+			out.close();
+		} catch (IOException e) {
+			fail();
+		}
+		try {
+			Thread.sleep(2);
+		} catch (InterruptedException e) {
+			fail();
+		}
+		assertTrue(file.delete());
+		
+		assertFalse(file.exists());
+		assertFalse(file.isWritable());
+		assertTrue(file.length()==0);
+		assertTrue(file.lastModified() == FSConstans.START_LAST_MODIF_VAL);
+	}
+	
+	@Test
 	public void setReadOnlyFileTest1() {
 		assertFalse(file.setReadOnly());
 	}
@@ -256,6 +287,7 @@ public abstract class AbstractFileTests {
 		pw.println(testStr1);
 		pw.println(testStr2);
 		pw.flush();
+		pw.close();
 		assertTrue(file.length() > 0);
 
 		try {
@@ -267,6 +299,53 @@ public abstract class AbstractFileTests {
 		try {
 			assertEquals(r.readLine(), testStr1);
 			assertEquals(r.readLine(), testStr2);
+			assertNull(r.readLine());
+		} catch (IOException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testAppendedOutputStream() {
+		try {
+			out = file.getNewOutputStream();
+		} catch (FileNotFoundException e1) {
+			fail();
+		}
+		PrintWriter pw = new PrintWriter(new BufferedOutputStream(out));
+		String testStr1 = "hello";
+		String testStr2 = "people!";
+		pw.println(testStr1);
+		pw.println(testStr2);
+		pw.flush();
+		pw.close();
+		assertTrue(file.length() > 0);
+
+		try {
+			out = file.getNewOutputStream(true);
+		} catch (FileNotFoundException e1) {
+			fail();
+		}
+		pw = new PrintWriter(new BufferedOutputStream(out));
+		String testStr3 = "HELLO";
+		String testStr4 = "PEOPLE!";
+		pw.println(testStr3);
+		pw.println(testStr4);
+		pw.flush();
+		pw.close();
+		assertTrue(file.length() > 0);
+		
+		try {
+			in = file.getNewInputStream();
+		} catch (FileNotFoundException e1) {
+			fail();
+		}
+		BufferedReader r = new BufferedReader(new InputStreamReader(in));
+		try {
+			assertEquals(r.readLine(), testStr1);
+			assertEquals(r.readLine(), testStr2);
+			assertEquals(r.readLine(), testStr3);
+			assertEquals(r.readLine(), testStr4);
 			assertNull(r.readLine());
 		} catch (IOException e) {
 			fail();
