@@ -26,7 +26,7 @@ public abstract class AbstractDiskTest {
 	@After
 	public void tearDown() throws Exception {
 		disk.clear();
-		disk.delete();
+//		disk.delete();
 	}
 
 	@Test
