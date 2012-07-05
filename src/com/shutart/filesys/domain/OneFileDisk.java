@@ -29,12 +29,12 @@ public final class OneFileDisk extends AbstractDisk implements IDisk{
 	public static OneFileDisk getInstance(String diskName, int numberOfPages,
 			int pageSize) {
 		try {
-			OneFileDisk disk = diskName2Inst.get(diskName);
+			String fullDiskName = getFullDiskName(diskName, numberOfPages,
+					pageSize);
+			OneFileDisk disk = diskName2Inst.get(fullDiskName);
 			if (disk != null)
 				return disk;
 
-			String fullDiskName = getFullDiskName(diskName, numberOfPages,
-					pageSize);
 			File diskFile = new File(fullDiskName);
 			boolean fileAlreadyExists = diskFile.exists();
 			if (!fileAlreadyExists) {
