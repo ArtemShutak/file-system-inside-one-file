@@ -6,9 +6,9 @@ import com.shutart.filesys.domain.IDisk;
 import com.shutart.filesys.domain.IDiskDriver;
 import com.shutart.filesys.domain.IFile;
 import com.shutart.filesys.domain.IFileSystem;
-import com.shutart.filesys.domain.OneFileDisk;
 import com.shutart.filesys.driverimpl.DiskDriverImpl;
 import com.shutart.filesys.filesysimpl.FileSysImpl;
+import com.shutart.filesys.onefiledisk.OneFileDisk;
 import com.shutart.onefilefs.test.util.AbstractFileTests;
 
 public final class FileImplTestsOverOneFileDisk extends AbstractFileTests {

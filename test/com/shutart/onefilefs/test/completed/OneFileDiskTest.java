@@ -1,7 +1,7 @@
 package com.shutart.onefilefs.test.completed;
 
 import com.shutart.filesys.domain.IDisk;
-import com.shutart.filesys.domain.OneFileDisk;
+import com.shutart.filesys.onefiledisk.OneFileDisk;
 import com.shutart.onefilefs.test.util.AbstractDiskTest;
 import static org.junit.Assert.*;
 

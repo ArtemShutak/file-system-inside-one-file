@@ -4,8 +4,8 @@ import static org.junit.Assert.assertNotNull;
 
 import com.shutart.filesys.domain.IDisk;
 import com.shutart.filesys.domain.IDiskDriver;
-import com.shutart.filesys.domain.OneFileDisk;
 import com.shutart.filesys.driverimpl.DiskDriverImpl;
+import com.shutart.filesys.onefiledisk.OneFileDisk;
 import com.shutart.onefilefs.test.util.AbstractDiskDriverSpec;
 
 public final class DiskDriverImplSpecOverOneFileDisk extends AbstractDiskDriverSpec {

@@ -1,4 +1,4 @@
-package com.shutart.filesys.domain;
+package com.shutart.filesys.onefiledisk;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +10,9 @@ import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.shutart.filesys.domain.AbstractDisk;
+import com.shutart.filesys.domain.IDisk;
 
 public final class OneFileDisk extends AbstractDisk implements IDisk{
 	
