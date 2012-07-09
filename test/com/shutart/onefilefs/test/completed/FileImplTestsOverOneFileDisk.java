@@ -1,5 +1,6 @@
 package com.shutart.onefilefs.test.completed;
 
+import com.shutart.filesys.domain.BufferedDisk;
 import com.shutart.filesys.domain.FSConstans;
 import com.shutart.filesys.domain.FileImpl;
 import com.shutart.filesys.domain.IDisk;
@@ -21,6 +22,7 @@ public final class FileImplTestsOverOneFileDisk extends AbstractFileTests {
 				FSConstans.DISK_NUMBER_OF_PAGES, FSConstans.DISK_PAGE_SIZE);
 //		disk = MemoryDisk.getInstance(FSConstans.DISK_NUMBER_OF_PAGES, 
 //				FSConstans.DISK_PAGE_SIZE);
+		disk = new BufferedDisk(disk, FSConstans.DISK_BUFFER_SIZE_IN_PAGES);
 		IDiskDriver diskDriver = DiskDriverImpl.getDriver4Disk(disk);
 		diskDriver.formatDisk();
 		IFileSystem fs = new FileSysImpl(diskDriver);
@@ -29,6 +31,7 @@ public final class FileImplTestsOverOneFileDisk extends AbstractFileTests {
 	
 	@Override
 	protected void diskDriverReleaseDisk() {
+		disk.release();
 		DiskDriverImpl.releaseDisk(disk);
 	}
 
