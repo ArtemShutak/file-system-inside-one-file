@@ -42,7 +42,6 @@ public final class BufferedDisk extends AbstractDisk implements IDisk {
 				if (!pageNumIter.hasNext())
 					throw new IllegalStateException();
 				Integer oldPageNum = pageNumIter.next();
-				System.out.println("oldPageNum " + oldPageNum);
 				DiskPage oldPage = pageNum2Page.remove(oldPageNum);
 				oldPage.writeToDisk();
 			}
