@@ -68,4 +68,9 @@ public final class MemoryDisk extends AbstractDisk implements IDisk {
 		rez = rez*37 + getPageSize();
 		return rez;
 	}
+
+	@Override
+	public void release() {
+		//do nothing
+	}
 }

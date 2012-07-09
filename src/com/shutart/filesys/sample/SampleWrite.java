@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.shutart.filesys.domain.BufferedDisk;
 import com.shutart.filesys.domain.FSConstans;
 import com.shutart.filesys.domain.FileImpl;
 import com.shutart.filesys.domain.IDisk;
@@ -17,8 +18,9 @@ import com.shutart.filesys.onefiledisk.OneFileDisk;
 public class SampleWrite {
 
 	static final String SAMPLE_FILE_NAME = "samplePath/sampleFile";
-	static final int NUMBERS = 10;
+	static final int NUMBERS = 1000;
 	private static final String SAMPLE_STRING = "Some string for testing ";
+	private static final int bufferSizeInPages = 10;
 
 	/**
 	 * @param args
@@ -26,7 +28,9 @@ public class SampleWrite {
 	 */
 	public static void main(String[] args) throws IOException {
 		System.out.println(SampleWrite.class.getSimpleName() + " START");
-		IFileSystem fs = getFileSystem(true);
+		IDisk disk = getDisk();
+		IFileSystem fs = getFileSystem(disk , true);
+		
 		IFile file = new FileImpl(SAMPLE_FILE_NAME, fs);
 		long startTime = System.currentTimeMillis();		
 		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(file.getNewOutputStream()));
@@ -35,6 +39,9 @@ public class SampleWrite {
 		}
 		out.flush();
 		out.close();
+		
+		disk.release();
+		
 		System.out.println("Time:" + (System.currentTimeMillis()-startTime)/1000.0);
 		System.out.println("FINISH");
 	}
@@ -43,11 +50,15 @@ public class SampleWrite {
 		return SAMPLE_STRING + "_"+i+"\n";
 	}
 
-	static IFileSystem getFileSystem(boolean isNewDisk) {
-		IDisk disk = OneFileDisk.getInstance("testPath/" + FSConstans.DISK_NAME,
-				FSConstans.DISK_NUMBER_OF_PAGES, FSConstans.DISK_PAGE_SIZE);
+	static IFileSystem getFileSystem(IDisk disk, boolean isNewDisk) {
 		IDiskDriver diskDriver = DiskDriverImpl.getDriver4Disk(disk);
 		return new FileSysImpl(diskDriver, isNewDisk );
+	}
+
+	static IDisk getDisk() {
+		IDisk disk = OneFileDisk.getInstance("testPath/" + FSConstans.DISK_NAME,
+				FSConstans.DISK_NUMBER_OF_PAGES, FSConstans.DISK_PAGE_SIZE);
+		return new BufferedDisk(disk, bufferSizeInPages);
 	}
 
 }

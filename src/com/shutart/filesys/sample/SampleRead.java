@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.shutart.filesys.domain.FileImpl;
+import com.shutart.filesys.domain.IDisk;
 import com.shutart.filesys.domain.IFile;
 import com.shutart.filesys.domain.IFileSystem;
 
@@ -16,7 +17,8 @@ class SampleRead {
 	 */
 	public static void main(String[] args) throws IOException {
 		System.out.println(SampleRead.class.getSimpleName() + " START");
-		IFileSystem fs = SampleWrite.getFileSystem(false);
+		IDisk disk = SampleWrite.getDisk();
+		IFileSystem fs = SampleWrite.getFileSystem(disk , false);
 		IFile file = new FileImpl(SampleWrite.SAMPLE_FILE_NAME, fs);
 		
 		long startTime = System.currentTimeMillis();
@@ -28,6 +30,8 @@ class SampleRead {
 					throw new IllegalStateException();
 		}
 		in.close();
+		
+		disk.release();
 		System.out.println("Time:" + (System.currentTimeMillis()-startTime)/1000.0);
 		System.out.println("FINISH");
 	}

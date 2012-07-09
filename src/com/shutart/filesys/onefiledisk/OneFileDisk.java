@@ -165,15 +165,20 @@ public final class OneFileDisk extends AbstractDisk implements IDisk{
 	}
 
 	@Override
-	public boolean delete() {
+	public void release() {
 		try {
 			lock.release();
 			raf.close();
 			channel.close();
-			return file.delete() ;
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	@Override
+	public boolean delete() {
+		release();
+		return file.delete() ;
 	}
 	
 	@Override
