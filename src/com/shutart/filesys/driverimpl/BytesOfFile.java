@@ -17,6 +17,7 @@ final class BytesOfFile implements IBytesOfFile {
 	private final IDisk disk;
 	private final DiskIndex index;
 	private final List<Integer> numbersOfDiskPages = new ArrayList<Integer>();
+	private volatile int size = -1;
 	private final Object monitor;
 
 	BytesOfFile(IDisk disk, DiskIndex index, int indexOfFirstFilePage, Object monitor) {
@@ -48,6 +49,14 @@ final class BytesOfFile implements IBytesOfFile {
 	}
 
 	public int size() {
+		synchronized (monitor) {
+			if (size == -1)
+				size = readSizeFromDisk();
+			return size;
+		}
+	}
+
+	private int readSizeFromDisk() {
 		try {
 			synchronized (monitor) {
 				byte[] buf = disk.getPageContent(numbersOfDiskPages.get(0), 0, 4);
@@ -67,6 +76,8 @@ final class BytesOfFile implements IBytesOfFile {
 				DataOutputStream r = new DataOutputStream(byteArray );
 				r.writeInt(newSize); 
 				disk.setPageContent(numbersOfDiskPages.get(0), 0, byteArray.toByteArray());
+				
+				size = newSize;
 			}
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
