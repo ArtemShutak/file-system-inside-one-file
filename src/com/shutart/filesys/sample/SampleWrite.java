@@ -20,7 +20,6 @@ public class SampleWrite {
 	static final String SAMPLE_FILE_NAME = "samplePath/sampleFile";
 	static final int NUMBERS = 1000;
 	private static final String SAMPLE_STRING = "Some string for testing ";
-	private static final int bufferSizeInPages = 10;
 
 	/**
 	 * @param args
@@ -58,7 +57,7 @@ public class SampleWrite {
 	static IDisk getDisk() {
 		IDisk disk = OneFileDisk.getInstance("testPath/" + FSConstans.DISK_NAME,
 				FSConstans.DISK_NUMBER_OF_PAGES, FSConstans.DISK_PAGE_SIZE);
-		return new BufferedDisk(disk, bufferSizeInPages);
+		return new BufferedDisk(disk, FSConstans.DISK_BUFFER_SIZE_IN_PAGES);
 	}
 
 }
