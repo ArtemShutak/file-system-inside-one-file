@@ -5,6 +5,7 @@ final class DiskPage {
 	private final IDisk disk;
 	private final byte[] bytes;
 	private final int pageNumber;
+	private volatile boolean changed;
 	
 	private DiskPage(int pageNumber, byte[] bytes, IDisk disk) {
 		this.pageNumber = pageNumber;
@@ -25,11 +26,15 @@ final class DiskPage {
 	}
 	
 	void setContent(int from, byte[] pageContent) {
+		changed = true;
 		System.arraycopy(pageContent, 0, bytes, from, pageContent.length);
 	}
 
 	void writeToDisk() {
-		disk.setPageContent(pageNumber, bytes);
+		if (changed){
+			disk.setPageContent(pageNumber, bytes);
+			changed = false;
+		}
 	}
 
 }
