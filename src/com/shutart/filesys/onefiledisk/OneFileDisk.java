@@ -168,8 +168,6 @@ public final class OneFileDisk extends AbstractDisk implements IDisk{
 	public void release() {
 		try {
 			lock.release();
-			raf.close();
-			channel.close();
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
@@ -178,6 +176,12 @@ public final class OneFileDisk extends AbstractDisk implements IDisk{
 	@Override
 	public boolean delete() {
 		release();
+		try {
+			raf.close();
+			channel.close();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 		return file.delete() ;
 	}
 	
