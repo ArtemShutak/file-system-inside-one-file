@@ -170,7 +170,7 @@ public class FileSysImpl implements IFileSystem {
 		return getNewOutputStream(fileId, fileAttrs, append, true);
 	}
 	
-	private static final int DEFAULT_BYTE_BUFFER_SIZE = 8192;
+	private static final int DEFAULT_BYTE_BUFFER_SIZE = FSConstans.DISK_PAGE_SIZE;//8192;
 	OutputStream getNewOutputStream(int fileId, FileAttrs fileAttrs, boolean append, boolean needUpdateFileAttrs){
 		OutputStream out = null;
 		if (append) {
@@ -499,6 +499,15 @@ public class FileSysImpl implements IFileSystem {
 		if (!exists(file) || fromPosition > file.length())
 			return NULL_BYTE_ARRAY;
 		int fileId = fileName2FileId.get(file.getName());
+		return getBytes(fileId, fromPosition, length);
+	}
+
+	byte[] getBytes(int fileId, int fromPosition, int length) {
+		if (fromPosition < 0 )
+			throw new IndexOutOfBoundsException("fromPosition=" + fromPosition);
+		if (fileId < 0 ||  length < 0)
+			throw new IllegalArgumentException("fileId=" + fileId 
+					+ " length="+length);
 		try {
 			IBytesOfFile bytesOfFile = diskDriver.getBytesOfFile(fileId);
 			byte[] rez = new byte[Math.min(length, (int) lengthByFileId(fileId)

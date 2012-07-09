@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.shutart.filesys.domain.FSConstans;
 
@@ -16,6 +18,7 @@ final class FileId2FileAttrsMapper {
 	private static final byte[] FREE_ENTRY_MARKER_AS_BYTES;
 //	private final Map<Integer, FileAttrs> fileId2Attrs = new HashMap<Integer, FileId2FileAttrsMapper.FileAttrs>();
 	private final FileSysImpl fileSys;
+	private final Map<Integer, Integer> fileId2NumberOfEntryCache = new HashMap<Integer, Integer>();
 
 	static{
 		ByteBuffer buf = ByteBuffer.allocate(4);
@@ -42,41 +45,53 @@ final class FileId2FileAttrsMapper {
 
 	
 	public FileAttrs getAttrsOf(int fileId) {
-		InputStream in = null;
-		DataInputStream dataIn = null;
-		try {
-			in = fileSys.getNewIntputStream(FILE_ID, 0);
-			dataIn = new DataInputStream(
-				new BufferedInputStream(in));
-			while (dataIn.available() > 0) {
-				int fId = dataIn.readInt();
-				if (fId == fileId){
-					boolean isReadOnly = dataIn.readBoolean();
-					long lastModified = dataIn.readLong();
-					return new FileAttrs(fileId, isReadOnly, lastModified);
-				}else{
-					dataIn.skip(sizeAttrsInBytes());
-				}
-			}
+		int numberOfEntryWithThisFileId = numberOfEntryWithThisFileId(fileId);
+		if (numberOfEntryWithThisFileId == -1)
 			return null;
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		} finally {
-			try {
-				if (dataIn != null)
-					dataIn.close();
-				else if (in != null)
-					in.close();
-			} catch (IOException e) {
-				throw new IllegalStateException(e);
-			}
-		}
+		int startReadAttrsPosition = numberOfEntryWithThisFileId * (4 + sizeAttrsInBytes());
+		byte[] bytesOfAttrs = fileSys.getBytes(FILE_ID, startReadAttrsPosition, 4 + sizeAttrsInBytes());
+		ByteBuffer buf = ByteBuffer.wrap(bytesOfAttrs);
+		buf.getInt();//fileId
+		boolean isReadOnly = buf.get() == 0 ? false : true;  
+		long lastModified = buf.getLong();
+		return new FileAttrs(fileId, isReadOnly, lastModified);
+		
+//		InputStream in = null;
+//		DataInputStream dataIn = null;
+//		try {
+//			in = fileSys.getNewIntputStream(FILE_ID, 0);
+//			dataIn = new DataInputStream(
+//				new BufferedInputStream(in));
+//			while (dataIn.available() > 0) {
+//				int fId = dataIn.readInt();
+//				if (fId == fileId){
+//					boolean isReadOnly = dataIn.readBoolean();
+//					long lastModified = dataIn.readLong();
+//					return new FileAttrs(fileId, isReadOnly, lastModified);
+//				}else{
+//					dataIn.skip(sizeAttrsInBytes());
+//				}
+//			}
+//			return null;
+//		} catch (IOException e) {
+//			throw new IllegalStateException(e);
+//		} finally {
+//			try {
+//				if (dataIn != null)
+//					dataIn.close();
+//				else if (in != null)
+//					in.close();
+//			} catch (IOException e) {
+//				throw new IllegalStateException(e);
+//			}
+//		}
 //		FileAttrs attrs = fileId2Attrs.get(fileId);
 //		return attrs;
 	}
 	
 	public void clear() {
 		try {
+			fileId2NumberOfEntryCache.clear();
 			OutputStream out = fileSys.getNewOutputStream(FILE_ID, fileSys.attrsOf(FILE_ID), false);
 			out.close();
 		} catch (IOException e) {
@@ -89,12 +104,14 @@ final class FileId2FileAttrsMapper {
 		int numberOfEntryWithThisFileId = numberOfEntryWithThisFileId(fileId);
 		int startWritePosition = numberOfEntryWithThisFileId * (4 + sizeAttrsInBytes());
 		fileSys.setBytes(FILE_ID, startWritePosition, FREE_ENTRY_MARKER_AS_BYTES);
+		fileId2NumberOfEntryCache.remove(fileId);
 //		fileId2Attrs.remove(fileId);
 	}
 	
 	public void put(int newFileId, FileAttrs attrs) {
-		if (numberOfEntryWithThisFileId(newFileId) != -1)
-			throw new IllegalStateException();
+		if (numberOfEntryWithThisFileId(newFileId) != -1){
+			throw new IllegalStateException("newFileId="+newFileId + " fileId2NumberOfEntryCache= "+ fileId2NumberOfEntryCache );
+		}
 		int numberOfFreeEntry = numberOfEntryWithThisFileId(FREE_ENTRY_MARKER);
 		
 		putUniversal(newFileId, attrs, numberOfFreeEntry);
@@ -135,6 +152,9 @@ final class FileId2FileAttrsMapper {
 	}
 
 	private int numberOfEntryWithThisFileId(int fileId) {
+		Integer numberOfEntryFromCache = fileId2NumberOfEntryCache.get(fileId);
+		if (numberOfEntryFromCache != null)
+			return numberOfEntryFromCache;
 		InputStream in = null;
 		DataInputStream dataIn = null;
 		try {
@@ -143,9 +163,10 @@ final class FileId2FileAttrsMapper {
 			int numberOfEntry = 0;
 			while (dataIn.available() > 0) {
 				int fId = dataIn.readInt();
-				if (fId == fileId)
+				if (fId == fileId){
+					fileId2NumberOfEntryCache.put(fileId, numberOfEntry);
 					return numberOfEntry;
-				else{
+				}else{
 					dataIn.skip(sizeAttrsInBytes());					
 				}
 				numberOfEntry++;
