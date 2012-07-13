@@ -52,6 +52,7 @@ final class FileName2FileIdMapper {
 					String fName = new String(bytesOfFileName);
 					if (fName.equals(fileName))
 						return dataIn.readInt();
+					dataIn.skip(4);
 				} else {
 					dataIn.skip(MAX_LENGTH_OF_FILE_NAME + 4);
 				}
@@ -185,7 +186,7 @@ final class FileName2FileIdMapper {
 		
 		if (freeEntryNumber != -1){
 			int startPos = freeEntryNumber * SIZE_OF_ONE_ENTRY;
-			fileSys.setBytes(fileId, startPos, bytes);
+			fileSys.setBytes(FILE_ID_4_THIS_MAP, startPos, bytes);
 		} else {
 			OutputStream out = new BufferedOutputStream(
 					fileSys.getNewOutputStream(FILE_ID_4_THIS_MAP,
