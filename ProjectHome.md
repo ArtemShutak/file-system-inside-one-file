@@ -1,0 +1,1 @@
+Set of classes to emulate file system inside one file.
